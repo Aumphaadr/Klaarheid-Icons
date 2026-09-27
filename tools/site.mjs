@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ICONS } from '../src/icons.mjs';
 import { CATEGORIES } from '../src/meta.mjs';
+import { LUCIDE, TABLER } from '../src/third-party.mjs';
 import { iconStats, svgHash, statsRow, readCache, writeCache } from './stats.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -20,6 +21,7 @@ const problems = [
   ...listed.filter((n, k) => listed.indexOf(n) !== k).map((n) => `${n}: дважды в каталоге`),
   ...listed.filter((n) => !names.has(n)).map((n) => `${n}: есть в каталоге, нет в src/icons.mjs`),
   ...[...names].filter((n) => !listed.includes(n)).map((n) => `${n}: нет в каталоге src/meta.mjs`),
+  ...[...Object.keys(LUCIDE), ...Object.keys(TABLER)].filter((n) => !names.has(n)).map((n) => `${n}: есть в src/third-party.mjs, нет в src/icons.mjs`),
 ];
 if (problems.length) { console.error(problems.join('\n')); process.exit(1); }
 
@@ -40,7 +42,7 @@ for (const c of CATEGORIES) {
     let st = cache[name]?.hash === hash ? cache[name].st : null;
     if (!st) { st = statsRow(iconStats(fill, name)); computed++; }
     fresh[name] = { hash, st };
-    icons.push({ n: name, c: c.id, ru, t: tags, d: pathD(fill), s: strokeInner(stroke), st });
+    icons.push({ n: name, c: c.id, ru, t: tags, d: pathD(fill), s: strokeInner(stroke), st, ...(LUCIDE[name] ? { l: LUCIDE[name] } : {}), ...(TABLER[name] ? { tb: TABLER[name] } : {}) });
   }
 }
 writeCache(fresh);
@@ -54,7 +56,21 @@ if (cname) fs.writeFileSync(path.join(DOCS, 'CNAME'), cname);
 for (const f of ['index.html', 'app.css', 'app.js']) fs.copyFileSync(path.join(SITE, f), path.join(DOCS, f));
 // шрифты сайта (Onest, Source Code Pro) — вместе с их лицензиями OFL
 fs.cpSync(path.join(SITE, 'fonts'), path.join(DOCS, 'fonts'), { recursive: true });
-const data = { categories: cats, icons, license: read('LICENSE') };
+// сторонние лицензии: списки иконок, совпавших с Lucide и Tabler, — между метками <!--lucide-list-->…<!--/lucide-list-->
+// и <!--tabler-list-->…<!--/tabler-list-->, их числа — между <!--lucide-count-->… и <!--tabler-count-->… (здесь и в README)
+const listOf = (map, label) => Object.keys(map).sort().map((n) => (map[n] === n ? `\`${n}\`` : `\`${n}\` (${label}: \`${map[n]}\`)`)).join(', ').concat('.')
+  .replace(/(.{1,112})(, |$)/g, (m, a, b) => `${a}${b.trim() ? ',' : ''}\n`).trimEnd();
+const withCounts = (text) => text
+  .replace(/<!--lucide-count-->\d+<!--\/lucide-count-->/g, `<!--lucide-count-->${Object.keys(LUCIDE).length}<!--/lucide-count-->`)
+  .replace(/<!--tabler-count-->\d+<!--\/tabler-count-->/g, `<!--tabler-count-->${Object.keys(TABLER).length}<!--/tabler-count-->`);
+{
+  const file = path.join(ROOT, 'THIRD-PARTY-NOTICES.md'), text = fs.readFileSync(file, 'utf8');
+  const next = withCounts(text)
+    .replace(/<!--lucide-list-->[\s\S]*?<!--\/lucide-list-->/, `<!--lucide-list-->\n${listOf(LUCIDE, 'Lucide')}\n<!--/lucide-list-->`)
+    .replace(/<!--tabler-list-->[\s\S]*?<!--\/tabler-list-->/, `<!--tabler-list-->\n${listOf(TABLER, 'Tabler')}\n<!--/tabler-list-->`);
+  if (next !== text) fs.writeFileSync(file, next);
+}
+const data = { categories: cats, icons, license: read('LICENSE'), notices: read('THIRD-PARTY-NOTICES.md') };
 fs.writeFileSync(path.join(DOCS, 'icons.js'), `// Klaarheid Icons: данные сайта, собраны tools/site.mjs — не править руками\nwindow.KLAARHEID = ${JSON.stringify(data)};\n`);
 fs.writeFileSync(path.join(DOCS, '.nojekyll'), '');
 
@@ -76,7 +92,7 @@ fs.writeFileSync(path.join(ASSETS, 'icons-dark.svg'), wall('#e7eaef'));
 // число иконок в README — между метками <!--count-->…<!--/count-->
 for (const f of ['README.md', 'README.ru.md']) {
   const file = path.join(ROOT, f), text = fs.readFileSync(file, 'utf8');
-  const next = text.replace(/<!--count-->\d+<!--\/count-->/g, `<!--count-->${icons.length}<!--/count-->`);
+  const next = withCounts(text.replace(/<!--count-->\d+<!--\/count-->/g, `<!--count-->${icons.length}<!--/count-->`));
   if (next !== text) fs.writeFileSync(file, next);
 }
 

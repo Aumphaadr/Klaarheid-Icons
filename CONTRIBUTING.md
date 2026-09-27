@@ -46,3 +46,6 @@ Contributions are accepted under the project license, [MIT-0](LICENSE).
 - Circles are canonical; arcs are split at the axes and should not end closer than 5° to an axis.
 - Names describe the picture, in kebab-case (`map-pin`, `file-plus`); filled variants end with `-fill`, crossed-out
   ones with `-off`.
+- Do not copy or trace icons of other sets, and do not rebuild them number for number: a new icon must not coincide
+  with an icon of another set. The icons that already coincide with Lucide or Tabler are listed in
+  [`src/third-party.mjs`](src/third-party.mjs) and [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
