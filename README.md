@@ -6,7 +6,7 @@
 
 <p align="center">
   Precise open-source icons — <b>constructed, not traced</b>.<br>
-  <!--count-->345<!--/count--> icons on a 24 grid with a 2&nbsp;px line, as filled outlines and as strokes.
+  <!--count-->407<!--/count--> icons on a 24 grid with a 2&nbsp;px line, as filled outlines and as strokes.
 </p>
 
 <p align="center">
@@ -117,6 +117,7 @@ npm run serve          # preview docs/ at http://localhost:8080
 | `src/icons.mjs` | icon definitions — the single source |
 | `src/geom.mjs` | geometry kernel: offsets of segments and arcs, joins, union, cutouts, canonical cubics |
 | `src/meta.mjs` | catalog for the site: categories, Russian names, keywords |
+| `src/third-party.mjs` | icons that coincide with Lucide and Tabler icons (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)) |
 | `svg/` | built icons (generated) |
 | `tools/` | build, check, site and preview scripts |
 | `site/` | the site page: `index.html`, `app.css`, `app.js`, fonts |
@@ -133,7 +134,11 @@ with what it should mean and where it will be used.
 
 The first icons were made for the author’s projects [Idyllium](https://github.com/Aumphaadr/Idyllium),
 [SignoreBot](https://github.com/Aumphaadr/SignoreBot) and OOM. Compositions of many general-purpose icons follow the conventions of [Lucide](https://lucide.dev) and
-[Feather](https://feathericons.com); no outlines were copied — each icon is constructed anew from primitives.
+[Feather](https://feathericons.com). Each icon is constructed in code from primitives, but on the same grid and with
+the same line as Lucide and [Tabler Icons](https://tabler.io/icons), so <!--lucide-count-->101<!--/lucide-count--> icons
+came out the same as Lucide icons and <!--tabler-count-->24<!--/tabler-count--> as Tabler icons — mostly elementary
+signs such as a plus, chevrons or arrows. They are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) and are
+also covered by the Lucide license (ISC) or the Tabler license (MIT).
 
 The site is set in [Onest](https://github.com/simpals/onest) and
 [Source Code Pro](https://github.com/adobe-fonts/source-code-pro), both under the SIL Open Font License 1.1;
@@ -150,7 +155,11 @@ In short:
 - free in personal and commercial, open and closed projects;
 - no permission and no credit needed — not in your interface, on your site or in the credits;
 - no conditions at all: you do not even have to ship the license text with the files;
-- change the icons as you like, put them into your own sets and fonts;
-- clean rights: every icon is constructed from scratch, no outlines were copied from other sets.
+- change the icons as you like, put them into your own sets and fonts.
+
+A footnote: <!--lucide-count-->101<!--/lucide-count--> icons coincide with Lucide icons and
+<!--tabler-count-->24<!--/tabler-count--> with Tabler icons; they are also covered by the Lucide license (ISC) or the
+Tabler license (MIT) — if you use them, keep the matching text. The lists and the texts are in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), and the site marks these icons on their cards.
 
 An unofficial Russian translation: [LICENSE_RU.md](LICENSE_RU.md).

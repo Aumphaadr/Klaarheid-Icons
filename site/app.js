@@ -13,7 +13,7 @@
     get(k, d) { try { const v = localStorage.getItem(`klaarheid.${k}`); return v === null ? d : v; } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(`klaarheid.${k}`, v); } catch (e) { /* без хранилища — просто не запомним */ } },
   };
-  const REPO = 'https://github.com/Aumphaadr/Klaarheid-Icons';
+  const REPO = 'https://github.com/Aumphaadr/Klaarheid-Icons', NOTICES = `${REPO}/blob/main/THIRD-PARTY-NOTICES.md`;
 
   // ---------- тексты ----------
   const T = {
@@ -22,15 +22,19 @@
       pIcons: ['иконка', 'иконки', 'иконок'], pCats: ['категория', 'категории', 'категорий'],
       pNodes: ['узел', 'узла', 'узлов'], pLoops: ['контур', 'контура', 'контуров'],
       factGrid: 'сетка 24 · линия 2', factFormats: 'SVG · PNG',
-      licTitle: 'Лицензия MIT-0: бесплатно, без спроса и без условий',
+      licTitle: 'Лицензия MIT-0: бесплатно, без спроса и без условий*',
       licItems: [
         'Бесплатно — в личных и коммерческих проектах, открытых и закрытых.',
         'Без разрешений и без упоминания автора — ни в интерфейсе, ни на сайте, ни в титрах.',
         'Без условий: даже текст лицензии прикладывать к файлам не нужно.',
         'Можно менять: перекрашивать, перерисовывать, включать в свои наборы и шрифты.',
-        'Чистые права: каждая иконка построена с нуля в коде, чужие контуры не копировались — права принадлежат автору и передаются вам по MIT-0.',
+        'Права: каждая иконка построена в коде из отрезков и дуг, автор передаёт вам свои права по MIT-0.',
       ],
       licNote: 'MIT-0 (MIT No Attribution) — та же лицензия MIT, только без её единственного условия: сохранять уведомление об авторстве в копиях.',
+      licFoot: '* Сноска: есть иконки, чей рисунок совпадает с иконками Lucide ({n}) или Tabler ({m}). В основном это простые знаки — плюс, шевроны, стрелки, лупа, — но есть и рисунки вроде наушников и калькулятора. На них действует и лицензия того набора (Lucide — ISC, Tabler — MIT): берёте такие иконки — сохраните её текст. Они помечены в карточке; списки и тексты лицензий — в <a href="{url}" target="_blank" rel="noopener">THIRD-PARTY-NOTICES.md</a>.',
+      cardL: 'иконкой Lucide «{l}»', cardT: 'иконкой Tabler «{tb}»', cardLT: 'иконками Lucide «{l}» и Tabler «{tb}»',
+      licL: 'действует и лицензия ISC Lucide', licT: 'действует и лицензия MIT Tabler', licLT: 'действуют и лицензии ISC Lucide и MIT Tabler',
+      thirdCard: 'Сноска: рисунок совпадает с {what} — на него {lic}. Тексты лицензий — в <a href="{url}" target="_blank" rel="noopener">THIRD-PARTY-NOTICES.md</a>.',
       getAll: 'Скачать всё (SVG)', packMore: 'Другие варианты',
       heroCaption: '— узлы и рычаги контура; пунктир — осевая линия исходника',
       search: 'Поиск: имя или слово', size: 'Размер', color: 'Цвет', colorAuto: 'как текст', all: 'Все',
@@ -59,7 +63,7 @@
       copySvg: 'Копировать SVG', copyName: 'Копировать имя', copied: 'Скопировано', copyFail: 'Не вышло скопировать',
       exportNote: 'Контур — точная заливка одним path. Линия — осевые со stroke-width 2. Без выбранного цвета SVG берёт цвет текста (currentColor), а PNG будет чёрным.',
       colorNow: 'currentColor · PNG чёрным', of: 'из',
-      packTitle: 'Весь набор', packLede: '{n} {icons} одним архивом, вместе с лицензией.',
+      packTitle: 'Весь набор', packLede: '{n} {icons} одним архивом, вместе с лицензиями.',
       format: 'Формат', fmtSvg: 'SVG — контур и линия', fmtPng: 'PNG',
       colCurrent: 'currentColor — цвет текста (PNG — чёрным)', colChosen: 'выбранный цвет',
       packGo: 'Собрать и скачать', packBusy: 'Собираю: {i} из {n}', packDone: 'Готово: {file}', packFail: 'Не получилось: {err}',
@@ -69,15 +73,19 @@
       lede: 'Precise icons: each one is constructed from line segments and circular arcs on a 24 grid, not traced from a drawing. Circles are canonical, line ends are true semicircles, and symmetric icons match their mirror exactly.',
       pIcons: ['icon', 'icons'], pCats: ['category', 'categories'], pNodes: ['node', 'nodes'], pLoops: ['contour', 'contours'],
       factGrid: '24 grid · 2 px line', factFormats: 'SVG · PNG',
-      licTitle: 'MIT-0 License: free, no permission, no conditions',
+      licTitle: 'MIT-0 License: free, no permission, no conditions*',
       licItems: [
         'Free — in personal and commercial, open and closed projects.',
         'No permission and no credit needed — not in your interface, on your site or in the credits.',
         'No conditions: you do not even have to ship the license text with the files.',
         'Change them as you like: recolor, redraw, put them into your own sets and fonts.',
-        'Clean rights: every icon is constructed from scratch in code, no outlines were copied from other sets — the rights belong to the author and are granted to you under MIT-0.',
+        'Rights: every icon is constructed in code from line segments and arcs, and the author’s rights are granted to you under MIT-0.',
       ],
       licNote: 'MIT-0 (MIT No Attribution) is the MIT License without its only condition — keeping the copyright notice in copies.',
+      licFoot: '* Footnote: some icons coincide with Lucide icons ({n}) or Tabler icons ({m}). Most of them are elementary signs — a plus, chevrons, arrows, a magnifier — but some are pictograms, like headphones or a calculator. These are also covered by the license of that set (Lucide — ISC, Tabler — MIT): if you use them, keep its text. They are marked on their cards; the lists and the license texts are in <a href="{url}" target="_blank" rel="noopener">THIRD-PARTY-NOTICES.md</a>.',
+      cardL: 'the Lucide icon “{l}”', cardT: 'the Tabler icon “{tb}”', cardLT: 'the Lucide icon “{l}” and the Tabler icon “{tb}”',
+      licL: 'the Lucide ISC license', licT: 'the Tabler MIT license', licLT: 'the Lucide ISC and the Tabler MIT licenses',
+      thirdCard: 'Footnote: this drawing coincides with {what} and is also covered by {lic}. The license texts are in <a href="{url}" target="_blank" rel="noopener">THIRD-PARTY-NOTICES.md</a>.',
       getAll: 'Download all (SVG)', packMore: 'More options',
       heroCaption: '— nodes and handles of the outline; dashed — the source centerline',
       search: 'Search by name or keyword', size: 'Size', color: 'Color', colorAuto: 'text color', all: 'All',
@@ -106,7 +114,7 @@
       copySvg: 'Copy SVG', copyName: 'Copy name', copied: 'Copied', copyFail: 'Could not copy',
       exportNote: 'Outline is the precise filled shape, one path. Stroke is the centerline with stroke-width 2. Without a chosen color SVG uses the text color (currentColor) and PNG is black.',
       colorNow: 'currentColor · PNG in black', of: 'of',
-      packTitle: 'The whole pack', packLede: '{n} {icons} in one archive, license included.',
+      packTitle: 'The whole pack', packLede: '{n} {icons} in one archive, licenses included.',
       format: 'Format', fmtSvg: 'SVG — outline and stroke', fmtPng: 'PNG',
       colCurrent: 'currentColor — the text color (PNG in black)', colChosen: 'chosen color',
       packGo: 'Build and download', packBusy: 'Building: {i} of {n}', packDone: 'Done: {file}', packFail: 'Failed: {err}',
@@ -228,7 +236,7 @@
   if (!(size >= 16 && size <= 64)) size = 24;
   let colorMode = store.get('colorMode', 'auto'), colorVal = store.get('color', '#275f9e');
   if (!/^#[0-9a-f]{6}$/i.test(colorVal)) colorVal = '#275f9e';
-  let activeCat = 'all', query = '';
+  let currentCat = 'all', query = ''; // currentCat — раздел под панелью поиска (подсветка в оглавлении)
   let visible = ICONS;
   let cur = null, view = 'icon', zoom = +store.get('zoom', 192), xsize = +store.get('xsize', 24);
   if (!(zoom >= 16 && zoom <= 384)) zoom = 192;
@@ -251,7 +259,7 @@
   const matchQ = (ic, toks) => toks.every((tk) => ic.key.includes(tk));
   function applyFilter() {
     const toks = tokens();
-    visible = ICONS.filter((ic) => (activeCat === 'all' || ic.c === activeCat) && matchQ(ic, toks));
+    visible = ICONS.filter((ic) => matchQ(ic, toks));
     const set = new Set(visible.map((ic) => ic.n));
     for (const sec of $$('#grid .cat')) {
       let n = 0;
@@ -259,31 +267,47 @@
       sec.hidden = !n;
       sec.querySelector('small').textContent = n;
     }
-    $('#count').textContent = toks.length || activeCat !== 'all'
+    $('#count').textContent = toks.length
       ? t('countFound', { n: visible.length, total: ICONS.length })
       : t('countAll', { n: ICONS.length, icons: plural(ICONS.length, 'pIcons') });
     const empty = $('#empty');
     empty.hidden = visible.length > 0;
     if (!visible.length) empty.innerHTML = t('empty', { url: `${REPO}/issues/new?template=icon-request.md` });
     renderCats(toks);
+    spyCats();
   }
+  // категории — оглавление: число — сколько в разделе подходит под поиск; пустые гаснут и не нажимаются
   function renderCats(toks) {
     const counts = Object.fromEntries(CATS.map((c) => [c.id, 0]));
     let total = 0;
     for (const ic of ICONS) if (matchQ(ic, toks)) { counts[ic.c]++; total++; }
     const rows = [['all', t('all'), total], ...CATS.map((c) => [c.id, catName(c.id), counts[c.id]])];
     const focused = document.activeElement?.closest?.('#cats [data-cat]')?.dataset.cat;
-    $('#cats').innerHTML = rows.map(([id, name, n]) => `<button class="side-item${n ? '' : ' none'}" type="button" data-cat="${id}" aria-current="${id === activeCat}"><span>${esc(name)}</span><small>${n}</small></button>`).join('');
+    $('#cats').innerHTML = rows.map(([id, name, n]) => `<button class="side-item${n ? '' : ' none'}" type="button" data-cat="${id}"${n ? '' : ' disabled'} aria-current="${id === currentCat}"><span>${esc(name)}</span><small>${n}</small></button>`).join('');
     if (focused) $(`#cats [data-cat="${focused}"]`)?.focus();
-    $('#cat-select').innerHTML = rows.map(([id, name, n]) => `<option value="${id}"${id === activeCat ? ' selected' : ''}>${esc(name)} · ${n}</option>`).join('');
+    $('#cat-select').innerHTML = rows.map(([id, name, n]) => `<option value="${id}"${n ? '' : ' disabled'}${id === currentCat ? ' selected' : ''}>${esc(name)} · ${n}</option>`).join('');
   }
-  // выбрать категорию и, если страница ушла ниже, вернуться к началу сетки
-  function setCat(id) {
-    activeCat = id;
-    applyFilter();
-    const tb = $('#toolbar'), sticky = getComputedStyle(tb).position === 'sticky';
-    const top = $('.layout').getBoundingClientRect().top + window.scrollY - (sticky ? tb.offsetHeight : 0) - 4;
-    if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' });
+  // клик по категории прокручивает к её разделу (под липкую панель поиска); «Все» — к началу сетки. Фильтрует только поиск
+  const toolbarOffset = () => { const tb = $('#toolbar'); return getComputedStyle(tb).position === 'sticky' ? tb.offsetHeight : 0; };
+  function scrollToCat(id) {
+    const target = id === 'all' ? $('#grid') : $(`#grid .cat[data-cat="${id}"]`);
+    if (!target || target.hidden) return;
+    // «Все» — ниже линии подсветки (48), чтобы первый раздел ещё не считался текущим
+    const gap = id === 'all' ? 60 : 12;
+    window.scrollTo({ top: Math.max(0, target.getBoundingClientRect().top + window.scrollY - toolbarOffset() - gap), behavior: 'smooth' });
+  }
+  // подсветка в оглавлении — последний раздел, чей заголовок поднялся до линии в 48 px под панелью поиска; выше — «Все»
+  function spyCats() {
+    const edge = toolbarOffset() + 48;
+    let cur = 'all';
+    for (const sec of $$('#grid .cat')) {
+      if (sec.hidden) continue;
+      if (sec.getBoundingClientRect().top <= edge) cur = sec.dataset.cat; else break;
+    }
+    if (cur === currentCat) return;
+    currentCat = cur;
+    for (const b of $$('#cats [data-cat]')) b.setAttribute('aria-current', String(b.dataset.cat === cur));
+    $('#cat-select').value = cur;
   }
   function applyLook(skip) {
     const root = document.documentElement.style;
@@ -375,7 +399,9 @@
       t('factGrid'), t('factFormats'),
     ].map((x) => `<li>${x}</li>`).join('');
     const tick = svgInline(byName.get('check'), 18), note = svgInline(byName.get('circle-info'), 18);
-    $('#lic-list').innerHTML = t('licItems').map((x) => `<li>${tick}<span>${esc(x)}</span></li>`).join('') + `<li class="info">${note}<span>${esc(t('licNote'))}</span></li>`;
+    const nL = ICONS.filter((ic) => ic.l).length, nT = ICONS.filter((ic) => ic.tb).length;
+    $('#lic-list').innerHTML = t('licItems').map((x) => `<li>${tick}<span>${esc(x)}</span></li>`).join('') + `<li class="info">${note}<span>${esc(t('licNote'))}</span></li>`
+      + `<li class="foot"><span></span><span>${t('licFoot', { n: nL, m: nT, url: NOTICES })}</span></li>`;
     $('#rules').innerHTML = t('rules').map((r) => `<li>${r}</li>`).join('');
     $('#use-code').innerHTML = `${hlHtml(t('useHtml'))}\n\n${hlCss(t('useCss'))}`;
     $('#p-lede').textContent = t('packLede', { n: ICONS.length, icons: plural(ICONS.length, 'pIcons') });
@@ -438,6 +464,9 @@
     if (circles) items.push([`${canon} ${t('of')} ${circles}`, t('stCircles')]);
     if (mirror !== null && mirror !== undefined) items.push([mirror === 0 ? '0' : `≤ ${mirror}`, t('stMirror')]);
     $('#d-stats').innerHTML = items.map(([b, s]) => `<li><b>${b}</b><span>${esc(s)}</span></li>`).join('');
+    const k = ic.l && ic.tb ? 'LT' : ic.l ? 'L' : ic.tb ? 'T' : '';
+    $('#d-lucide').hidden = !k;
+    $('#d-lucide').innerHTML = k ? t('thirdCard', { what: t(`card${k}`, { l: esc(ic.l ?? ''), tb: esc(ic.tb ?? '') }), lic: t(`lic${k}`), url: NOTICES }) : '';
     renderSizeChips($('#x-sizes'), xsize, (v) => { xsize = v; store.set('xsize', v); renderDetail(); });
     applyLook();
     $('#x-status').textContent = '';
@@ -557,6 +586,9 @@
     ] : [`PNG, ${px} × ${px} px, color ${color || '#000000'}, transparent background.`]),
     '',
     'MIT No Attribution (MIT-0): use freely, no conditions, no credit required — see LICENSE.',
+    `Footnote: ${ICONS.filter((ic) => ic.l).length} icons coincide with Lucide icons and ${ICONS.filter((ic) => ic.tb).length} with Tabler icons; they are also`,
+    'covered by the Lucide license (ISC) or the Tabler license (MIT) — keep the matching text when you use them;',
+    'the lists and the texts are in THIRD-PARTY-NOTICES.md.',
     '',
   ].join('\n');
   async function buildPack(fmt, px, color, onStep) {
@@ -573,6 +605,7 @@
       if (onStep && (i % 15 === 14 || i === ICONS.length - 1)) { onStep(i + 1); await new Promise((r) => setTimeout(r, 0)); }
     }
     files.push({ name: `${base}/LICENSE`, data: enc.encode(DATA.license), deflate: true });
+    files.push({ name: `${base}/THIRD-PARTY-NOTICES.md`, data: enc.encode(DATA.notices), deflate: true });
     files.push({ name: `${base}/README.txt`, data: enc.encode(README_TXT(fmt, px, color)), deflate: true });
     return { blob: await makeZip(files), file: `${base}${fmt === 'svg' && px !== 24 ? `-${px}` : ''}${suffix}.zip` };
   }
@@ -611,8 +644,10 @@
 
   // ---------- события ----------
   $('#grid').addEventListener('click', (e) => { const tile = e.target.closest('.tile'); if (tile) openDetail(tile.dataset.name); });
-  $('#cats').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
-  $('#cat-select').addEventListener('change', (e) => setCat(e.target.value));
+  $('#cats').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b && !b.disabled) scrollToCat(b.dataset.cat); });
+  $('#cat-select').addEventListener('change', (e) => scrollToCat(e.target.value));
+  let spyQueued = false;
+  window.addEventListener('scroll', () => { if (spyQueued) return; spyQueued = true; requestAnimationFrame(() => { spyQueued = false; spyCats(); }); }, { passive: true });
   // высота липкой панели — для липкой колонки категорий
   const setToolbarH = () => document.documentElement.style.setProperty('--toolbar-h', `${$('#toolbar').offsetHeight}px`);
   if (window.ResizeObserver) new ResizeObserver(setToolbarH).observe($('#toolbar')); else setToolbarH();
