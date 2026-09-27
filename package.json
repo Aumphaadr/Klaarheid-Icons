@@ -1,0 +1,28 @@
+{
+  "name": "klaarheid-icons",
+  "private": true,
+  "description": "Precise open-source icons constructed from line segments and circular arcs on a 24 grid.",
+  "keywords": ["icons", "svg", "icon-set", "geometry"],
+  "license": "MIT-0",
+  "author": "Nathaniel Larsson",
+  "homepage": "https://aumphaadr.github.io/Klaarheid-Icons/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aumphaadr/Klaarheid-Icons.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Aumphaadr/Klaarheid-Icons/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "check": "node tools/check.mjs",
+    "check:pixels": "node tools/check.mjs --pixels",
+    "site": "node tools/site.mjs",
+    "all": "node tools/build.mjs && node tools/check.mjs && node tools/site.mjs",
+    "serve": "node tools/serve.mjs"
+  }
+}

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Klaarheid Icons</title>
+<meta name="description" content="Точные открытые иконки: построены из отрезков и дуг окружностей на сетке 24. Цвет, размер, узлы и рычаги, SVG и PNG. Лицензия MIT-0: без условий и без упоминания автора.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+<script>
+  // тема до первой отрисовки, чтобы не мигало
+  try { const t = localStorage.getItem('klaarheid.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="brand" href="./" aria-label="Klaarheid Icons">
+      <span class="brand-mark" data-icon="aperture"></span>
+      <span class="brand-name">Klaarheid Icons</span>
+    </a>
+    <nav class="bar-nav">
+      <a class="btn ghost" href="https://github.com/Aumphaadr/Klaarheid-Icons" target="_blank" rel="noopener"><span data-icon="git-branch"></span><span>GitHub</span></a>
+      <button class="btn ghost" id="lang" type="button" aria-label="Switch to English">EN</button>
+      <button class="btn ghost icon-only" id="theme" type="button" aria-label="Тёмная тема"></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <div class="hero-text">
+      <h1>Klaarheid Icons</h1>
+      <p class="lede" data-i18n="lede">Точные иконки: каждая построена из отрезков и дуг окружностей на сетке 24, а не обведена с рисунка.</p>
+      <div class="lic">
+        <p class="lic-h"><span data-icon="shield-check"></span><b data-i18n="licTitle">Лицензия MIT-0: бесплатно, без спроса и без условий</b></p>
+        <ul class="lic-list" id="lic-list"></ul>
+      </div>
+      <ul class="facts" id="facts"></ul>
+      <div class="hero-actions">
+        <button class="btn primary" id="get-all" type="button"><span data-icon="download"></span><span data-i18n="getAll">Скачать всё (SVG)</span></button>
+        <button class="btn" id="pack-open" type="button"><span data-icon="gear-6"></span><span data-i18n="packMore">Другие варианты</span></button>
+      </div>
+      <p class="hint" id="get-all-status" role="status"></p>
+    </div>
+    <figure class="hero-art" id="hero-art">
+      <div class="hero-nodes" id="hero-nodes"></div>
+      <figcaption><code id="hero-name"></code> <span data-i18n="heroCaption">— узлы и рычаги контура; пунктир — осевая линия исходника</span></figcaption>
+    </figure>
+  </section>
+
+  <div class="toolbar" id="toolbar">
+    <div class="wrap toolbar-in">
+      <label class="search">
+        <span data-icon="search"></span>
+        <input id="q" type="search" autocomplete="off" spellcheck="false" data-i18n-placeholder="search" placeholder="Поиск: имя или слово">
+        <kbd>/</kbd>
+      </label>
+      <label class="ctl cat-pick">
+        <span data-i18n="category">Категория</span>
+        <select id="cat-select"></select>
+      </label>
+      <label class="ctl">
+        <span data-i18n="size">Размер</span>
+        <input id="size" type="range" min="16" max="64" step="4" value="24">
+        <output id="size-out">24</output>
+      </label>
+      <div class="ctl color-ctl">
+        <span data-i18n="color">Цвет</span>
+        <div class="cp" id="cp">
+          <button class="cp-swatch" id="cp-open" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="cp-pop" data-i18n-aria="colorPick" aria-label="Выбрать цвет"><i id="cp-chip"></i></button>
+          <div class="cp-pop" id="cp-pop" role="dialog" data-i18n-aria="colorPick" aria-label="Выбрать цвет" hidden>
+            <div class="cp-top">
+              <i class="cp-preview" id="cp-preview"></i>
+              <label class="cp-hex">HEX <input id="cp-hex" type="text" inputmode="text" spellcheck="false" autocomplete="off" maxlength="7"></label>
+            </div>
+            <div class="cp-row"><label for="cp-r">R</label><input class="cp-range" id="cp-r" type="range" min="0" max="255" step="1" value="0"><input class="cp-num" id="cp-rn" type="number" min="0" max="255" step="1" aria-label="R"></div>
+            <div class="cp-row"><label for="cp-g">G</label><input class="cp-range" id="cp-g" type="range" min="0" max="255" step="1" value="0"><input class="cp-num" id="cp-gn" type="number" min="0" max="255" step="1" aria-label="G"></div>
+            <div class="cp-row"><label for="cp-b">B</label><input class="cp-range" id="cp-b" type="range" min="0" max="255" step="1" value="0"><input class="cp-num" id="cp-bn" type="number" min="0" max="255" step="1" aria-label="B"></div>
+            <div class="cp-presets" id="cp-presets"></div>
+          </div>
+        </div>
+        <button class="chip" id="color-auto" type="button" data-i18n="colorAuto">как текст</button>
+      </div>
+      <span class="count" id="count" role="status"></span>
+    </div>
+  </div>
+
+  <div class="wrap layout">
+    <aside class="side" id="side" data-i18n-aria="categories" aria-label="Категории">
+      <p class="side-h" data-i18n="categories">Категории</p>
+      <nav class="side-list" id="cats"></nav>
+    </aside>
+    <div class="content">
+      <div id="grid"></div>
+      <p class="empty" id="empty" hidden></p>
+    </div>
+  </div>
+
+  <section class="wrap about" id="about">
+    <div>
+      <h2 data-i18n="aboutTitle">Как построены иконки</h2>
+      <ul class="rules" id="rules"></ul>
+    </div>
+    <div>
+      <h2 data-i18n="useTitle">Как подключить</h2>
+      <p data-i18n="useText">Берите файлы из архива или прямо из репозитория. Контур (svg/fill) — одна заливка; линия (svg/stroke) — осевые со stroke-width 2. Обе красятся через currentColor.</p>
+      <pre class="code" id="use-code"></pre>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p><span data-i18n="license">Лицензия MIT-0</span> · © 2026 Nathaniel Larsson</p>
+    <p><a href="https://github.com/Aumphaadr/Klaarheid-Icons" target="_blank" rel="noopener">github.com/Aumphaadr/Klaarheid-Icons</a> · <a href="https://github.com/Aumphaadr/Klaarheid-Icons/issues/new?template=icon-request.md" target="_blank" rel="noopener" data-i18n="request">Попросить иконку</a></p>
+  </div>
+</footer>
+
+<dialog class="dlg detail" id="detail" aria-labelledby="d-name">
+  <div class="d-head">
+    <div class="d-title">
+      <h2 id="d-name"></h2>
+      <p class="d-sub" id="d-sub"></p>
+    </div>
+    <div class="d-nav">
+      <button class="btn ghost icon-only" id="d-prev" type="button" data-i18n-aria="prev" aria-label="Предыдущая"><span data-icon="chevron-left"></span></button>
+      <button class="btn ghost icon-only" id="d-next" type="button" data-i18n-aria="next" aria-label="Следующая"><span data-icon="chevron-right"></span></button>
+      <button class="btn ghost icon-only" id="d-close" type="button" data-i18n-aria="close" aria-label="Закрыть"><span data-icon="x"></span></button>
+    </div>
+  </div>
+  <div class="d-body">
+    <div class="d-view">
+      <div class="seg" role="tablist">
+        <button type="button" role="tab" id="tab-icon" aria-selected="true" data-i18n="tabIcon">Иконка</button>
+        <button type="button" role="tab" id="tab-nodes" aria-selected="false" data-i18n="tabNodes">Узлы и рычаги</button>
+      </div>
+      <div class="stage" id="stage"></div>
+      <label class="ctl zoom" id="zoom-row">
+        <span data-i18n="zoom">Масштаб</span>
+        <input id="zoom" type="range" min="16" max="384" step="8" value="192">
+        <output id="zoom-out">192 px</output>
+      </label>
+      <p class="legend" id="legend" hidden>
+        <span><i class="lg-sq"></i><span data-i18n="lgCorner">угловой узел</span></span>
+        <span><i class="lg-ci"></i><span data-i18n="lgSmooth">гладкий узел</span></span>
+        <span><i class="lg-h"></i><span data-i18n="lgHandle">рычаг</span></span>
+        <span><i class="lg-ax"></i><span data-i18n="lgAxis">осевая линия</span></span>
+        <span><i class="lg-safe"></i><span data-i18n="lgSafe">поле 1</span></span>
+      </p>
+      <div class="ladder" id="ladder"></div>
+    </div>
+    <div class="d-side">
+      <ul class="d-stats" id="d-stats"></ul>
+      <div class="d-export">
+        <h3 data-i18n="download">Скачать</h3>
+        <div class="field">
+          <span class="field-label" data-i18n="exportSize">Размер, px</span>
+          <div class="chips" id="x-sizes"></div>
+        </div>
+        <div class="field">
+          <span class="field-label" data-i18n="color">Цвет</span>
+          <div class="x-color"><i class="swatch" id="x-swatch"></i><span id="x-color-text"></span></div>
+        </div>
+        <div class="btns">
+          <button class="btn primary" id="x-svg" type="button"><span data-icon="download"></span><span data-i18n="svgOutline">SVG · контур</span></button>
+          <button class="btn" id="x-svg-stroke" type="button"><span data-icon="download"></span><span data-i18n="svgStroke">SVG · линия</span></button>
+          <button class="btn" id="x-png" type="button"><span data-icon="image"></span><span>PNG</span></button>
+        </div>
+        <div class="btns">
+          <button class="btn ghost" id="x-copy" type="button"><span data-icon="copy"></span><span data-i18n="copySvg">Копировать SVG</span></button>
+          <button class="btn ghost" id="x-name" type="button"><span data-icon="copy"></span><span data-i18n="copyName">Копировать имя</span></button>
+        </div>
+        <p class="hint" id="x-status" role="status"></p>
+        <p class="note" data-i18n="exportNote">Контур — точная заливка одним path. Линия — осевые со stroke-width 2.</p>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="dlg pack" id="pack" aria-labelledby="p-title">
+  <form method="dialog" class="pack-form" id="pack-form">
+    <div class="d-head">
+      <h2 id="p-title" data-i18n="packTitle">Весь набор</h2>
+      <button class="btn ghost icon-only" value="cancel" formnovalidate data-i18n-aria="close" aria-label="Закрыть"><span data-icon="x"></span></button>
+    </div>
+    <p id="p-lede"></p>
+    <fieldset>
+      <legend data-i18n="format">Формат</legend>
+      <label class="opt"><input type="radio" name="fmt" value="svg" checked><span data-i18n="fmtSvg">SVG — контур и линия</span></label>
+      <label class="opt"><input type="radio" name="fmt" value="png"><span data-i18n="fmtPng">PNG</span></label>
+    </fieldset>
+    <fieldset>
+      <legend data-i18n="color">Цвет</legend>
+      <label class="opt"><input type="radio" name="col" value="auto" checked><span data-i18n="colCurrent">currentColor — цвет текста (PNG — чёрным)</span></label>
+      <label class="opt"><input type="radio" name="col" value="pick"><span data-i18n="colChosen">выбранный цвет</span> <i class="swatch" id="p-swatch"></i></label>
+    </fieldset>
+    <fieldset>
+      <legend data-i18n="exportSize">Размер, px</legend>
+      <div class="chips" id="p-sizes"></div>
+    </fieldset>
+    <div class="btns">
+      <button class="btn primary" id="p-go" type="button"><span data-icon="download"></span><span data-i18n="packGo">Собрать и скачать</span></button>
+    </div>
+    <progress id="p-progress" max="1" value="0" hidden></progress>
+    <p class="hint" id="p-status" role="status"></p>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
