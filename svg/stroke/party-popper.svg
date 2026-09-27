@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3.948683 18.15395L6.232499 11.302503C6.396895 10.809314 6.804935 10.436412 7.310895 10.316971C7.816854 10.19753 8.348583 10.348583 8.716184 10.716184L13.283816 15.283816C13.651417 15.651417 13.80247 16.183146 13.683029 16.689105C13.563588 17.195065 13.190686 17.603105 12.697497 17.767501L5.84605 20.051317C5.307048 20.230984 4.712797 20.0907 4.311048 19.688952C3.9093 19.287203 3.769016 18.692952 3.948683 18.15395Z"/>
+  <path d="M5.6 13.2L10.8 18.4"/>
+  <path d="M12.011416 8.238533C12.146988 6.688937 13.444485 5.5 15 5.5H17C18.656854 5.5 20 4.156854 20 2.5"/>
+  <path d="M17 13C17 11.895431 17.895431 11 19 11C20.104569 11 21 11.895431 21 13"/>
+  <path d="M8.620615 2.81596C8.418417 3.371493 8.472356 3.988018 8.767949 4.5"/>
+  <circle cx="3.5" cy="6" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="4.5" cy="2" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="12.5" cy="2" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="22" cy="7.5" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="19" cy="17" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="22" cy="20" r="1" fill="currentColor" stroke="none"/>
+</svg>

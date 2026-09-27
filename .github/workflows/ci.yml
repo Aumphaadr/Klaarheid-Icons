@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build the icons
+        run: npm run build
+      - name: Check the geometry
+        run: npm run check
+      - name: Build the site
+        run: npm run site
+      - name: Generated files are committed and up to date
+        run: |
+          git status --porcelain
+          test -z "$(git status --porcelain)"
