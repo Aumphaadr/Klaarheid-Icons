@@ -13,7 +13,7 @@
     get(k, d) { try { const v = localStorage.getItem(`klaarheid.${k}`); return v === null ? d : v; } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(`klaarheid.${k}`, v); } catch (e) { /* без хранилища — просто не запомним */ } },
   };
-  const REPO = 'https://github.com/Aumphaadr/Klaarheid-Icons', NOTICES = `${REPO}/blob/main/THIRD-PARTY-NOTICES.md`;
+  const REPO = 'https://github.com/Aumphaadr/Klaarheid-Icons';
 
   // ---------- тексты ----------
   const T = {
@@ -22,7 +22,7 @@
       pIcons: ['иконка', 'иконки', 'иконок'], pCats: ['категория', 'категории', 'категорий'],
       pNodes: ['узел', 'узла', 'узлов'], pLoops: ['контур', 'контура', 'контуров'],
       factGrid: 'сетка 24 · линия 2', factFormats: 'SVG · PNG',
-      licTitle: 'Лицензия MIT-0: бесплатно, без спроса и без условий*',
+      licTitle: 'Лицензия MIT-0: бесплатно, без спроса и без условий',
       licItems: [
         'Бесплатно — в личных и коммерческих проектах, открытых и закрытых.',
         'Без разрешений и без упоминания автора — ни в интерфейсе, ни на сайте, ни в титрах.',
@@ -31,10 +31,6 @@
         'Права: каждая иконка построена в коде из отрезков и дуг, автор передаёт вам свои права по MIT-0.',
       ],
       licNote: 'MIT-0 (MIT No Attribution) — та же лицензия MIT, только без её единственного условия: сохранять уведомление об авторстве в копиях.',
-      licFoot: '* Сноска: есть иконки, чей рисунок совпадает с иконками Lucide ({n}) или Tabler ({m}). В основном это простые знаки — плюс, шевроны, стрелки, лупа, — но есть и рисунки вроде наушников и калькулятора. На них действует и лицензия того набора (Lucide — ISC, Tabler — MIT): берёте такие иконки — сохраните её текст. Они помечены в карточке; списки и тексты лицензий — в <a href="{url}" target="_blank" rel="noopener">THIRD-PARTY-NOTICES.md</a>.',
-      cardL: 'иконкой Lucide «{l}»', cardT: 'иконкой Tabler «{tb}»', cardLT: 'иконками Lucide «{l}» и Tabler «{tb}»',
-      licL: 'действует и лицензия ISC Lucide', licT: 'действует и лицензия MIT Tabler', licLT: 'действуют и лицензии ISC Lucide и MIT Tabler',
-      thirdCard: 'Сноска: рисунок совпадает с {what} — на него {lic}. Тексты лицензий — в <a href="{url}" target="_blank" rel="noopener">THIRD-PARTY-NOTICES.md</a>.',
       getAll: 'Скачать всё (SVG)', packMore: 'Другие варианты',
       heroCaption: '— узлы и рычаги контура; пунктир — осевая линия исходника',
       search: 'Поиск: имя или слово', size: 'Размер', color: 'Цвет', colorAuto: 'как текст', all: 'Все',
@@ -42,7 +38,7 @@
       countAll: '{n} {icons}', countFound: 'найдено {n} из {total}',
       empty: 'Ничего не нашлось. Попробуйте другое слово или <a href="{url}" target="_blank" rel="noopener">попросите иконку</a>.',
       aboutTitle: 'Как построены иконки', useTitle: 'Как подключить',
-      useText: 'Берите файлы из архива или прямо из репозитория. Контур (svg/fill) — одна заливка; линия (svg/stroke) — осевые со stroke-width 2, как у Lucide и Feather. Обе красятся через currentColor.',
+      useText: 'Берите файлы из архива или прямо из репозитория. Контур (svg/fill) — одна заливка; линия (svg/stroke) — осевые со stroke-width 2. Обе красятся через currentColor.',
       rules: [
         '<b>Сетка 24 × 24, линия 2</b>, концы и стыки круглые. Тонкая линия 1,5 — только для мелких знаков в тесном поле.',
         '<b>Построены, а не нарисованы.</b> Исходник — осевые линии из отрезков и дуг окружностей; контур заливкой вычислен из них смещением на ±1 и объединением деталей.',
@@ -73,7 +69,7 @@
       lede: 'Precise icons: each one is constructed from line segments and circular arcs on a 24 grid, not traced from a drawing. Circles are canonical, line ends are true semicircles, and symmetric icons match their mirror exactly.',
       pIcons: ['icon', 'icons'], pCats: ['category', 'categories'], pNodes: ['node', 'nodes'], pLoops: ['contour', 'contours'],
       factGrid: '24 grid · 2 px line', factFormats: 'SVG · PNG',
-      licTitle: 'MIT-0 License: free, no permission, no conditions*',
+      licTitle: 'MIT-0 License: free, no permission, no conditions',
       licItems: [
         'Free — in personal and commercial, open and closed projects.',
         'No permission and no credit needed — not in your interface, on your site or in the credits.',
@@ -82,10 +78,6 @@
         'Rights: every icon is constructed in code from line segments and arcs, and the author’s rights are granted to you under MIT-0.',
       ],
       licNote: 'MIT-0 (MIT No Attribution) is the MIT License without its only condition — keeping the copyright notice in copies.',
-      licFoot: '* Footnote: some icons coincide with Lucide icons ({n}) or Tabler icons ({m}). Most of them are elementary signs — a plus, chevrons, arrows, a magnifier — but some are pictograms, like headphones or a calculator. These are also covered by the license of that set (Lucide — ISC, Tabler — MIT): if you use them, keep its text. They are marked on their cards; the lists and the license texts are in <a href="{url}" target="_blank" rel="noopener">THIRD-PARTY-NOTICES.md</a>.',
-      cardL: 'the Lucide icon “{l}”', cardT: 'the Tabler icon “{tb}”', cardLT: 'the Lucide icon “{l}” and the Tabler icon “{tb}”',
-      licL: 'the Lucide ISC license', licT: 'the Tabler MIT license', licLT: 'the Lucide ISC and the Tabler MIT licenses',
-      thirdCard: 'Footnote: this drawing coincides with {what} and is also covered by {lic}. The license texts are in <a href="{url}" target="_blank" rel="noopener">THIRD-PARTY-NOTICES.md</a>.',
       getAll: 'Download all (SVG)', packMore: 'More options',
       heroCaption: '— nodes and handles of the outline; dashed — the source centerline',
       search: 'Search by name or keyword', size: 'Size', color: 'Color', colorAuto: 'text color', all: 'All',
@@ -93,7 +85,7 @@
       countAll: '{n} {icons}', countFound: '{n} of {total}',
       empty: 'Nothing found. Try another word or <a href="{url}" target="_blank" rel="noopener">request an icon</a>.',
       aboutTitle: 'How the icons are built', useTitle: 'How to use',
-      useText: 'Take the files from the archive or straight from the repository. The outline flavour (svg/fill) is one filled path; the stroke flavour (svg/stroke) is centerlines with stroke-width 2, like Lucide and Feather. Both are colored with currentColor.',
+      useText: 'Take the files from the archive or straight from the repository. The outline flavour (svg/fill) is one filled path; the stroke flavour (svg/stroke) is centerlines with stroke-width 2. Both are colored with currentColor.',
       rules: [
         '<b>24 × 24 grid, 2 px line</b>, round caps and joins. A thinner 1.5 line only for small marks in tight spaces.',
         '<b>Constructed, not drawn.</b> The source is centerlines made of line segments and circular arcs; the filled outline is computed from them by offsetting ±1 and merging the parts.',
@@ -399,9 +391,7 @@
       t('factGrid'), t('factFormats'),
     ].map((x) => `<li>${x}</li>`).join('');
     const tick = svgInline(byName.get('check'), 18), note = svgInline(byName.get('circle-info'), 18);
-    const nL = ICONS.filter((ic) => ic.l).length, nT = ICONS.filter((ic) => ic.tb).length;
-    $('#lic-list').innerHTML = t('licItems').map((x) => `<li>${tick}<span>${esc(x)}</span></li>`).join('') + `<li class="info">${note}<span>${esc(t('licNote'))}</span></li>`
-      + `<li class="foot"><span></span><span>${t('licFoot', { n: nL, m: nT, url: NOTICES })}</span></li>`;
+    $('#lic-list').innerHTML = t('licItems').map((x) => `<li>${tick}<span>${esc(x)}</span></li>`).join('') + `<li class="info">${note}<span>${esc(t('licNote'))}</span></li>`;
     $('#rules').innerHTML = t('rules').map((r) => `<li>${r}</li>`).join('');
     $('#use-code').innerHTML = `${hlHtml(t('useHtml'))}\n\n${hlCss(t('useCss'))}`;
     $('#p-lede').textContent = t('packLede', { n: ICONS.length, icons: plural(ICONS.length, 'pIcons') });
@@ -464,9 +454,6 @@
     if (circles) items.push([`${canon} ${t('of')} ${circles}`, t('stCircles')]);
     if (mirror !== null && mirror !== undefined) items.push([mirror === 0 ? '0' : `≤ ${mirror}`, t('stMirror')]);
     $('#d-stats').innerHTML = items.map(([b, s]) => `<li><b>${b}</b><span>${esc(s)}</span></li>`).join('');
-    const k = ic.l && ic.tb ? 'LT' : ic.l ? 'L' : ic.tb ? 'T' : '';
-    $('#d-lucide').hidden = !k;
-    $('#d-lucide').innerHTML = k ? t('thirdCard', { what: t(`card${k}`, { l: esc(ic.l ?? ''), tb: esc(ic.tb ?? '') }), lic: t(`lic${k}`), url: NOTICES }) : '';
     renderSizeChips($('#x-sizes'), xsize, (v) => { xsize = v; store.set('xsize', v); renderDetail(); });
     applyLook();
     $('#x-status').textContent = '';
@@ -586,9 +573,6 @@
     ] : [`PNG, ${px} × ${px} px, color ${color || '#000000'}, transparent background.`]),
     '',
     'MIT No Attribution (MIT-0): use freely, no conditions, no credit required — see LICENSE.',
-    `Footnote: ${ICONS.filter((ic) => ic.l).length} icons coincide with Lucide icons and ${ICONS.filter((ic) => ic.tb).length} with Tabler icons; they are also`,
-    'covered by the Lucide license (ISC) or the Tabler license (MIT) — keep the matching text when you use them;',
-    'the lists and the texts are in THIRD-PARTY-NOTICES.md.',
     '',
   ].join('\n');
   async function buildPack(fmt, px, color, onStep) {
@@ -605,7 +589,6 @@
       if (onStep && (i % 15 === 14 || i === ICONS.length - 1)) { onStep(i + 1); await new Promise((r) => setTimeout(r, 0)); }
     }
     files.push({ name: `${base}/LICENSE`, data: enc.encode(DATA.license), deflate: true });
-    files.push({ name: `${base}/THIRD-PARTY-NOTICES.md`, data: enc.encode(DATA.notices), deflate: true });
     files.push({ name: `${base}/README.txt`, data: enc.encode(README_TXT(fmt, px, color)), deflate: true });
     return { blob: await makeZip(files), file: `${base}${fmt === 'svg' && px !== 24 ? `-${px}` : ''}${suffix}.zip` };
   }

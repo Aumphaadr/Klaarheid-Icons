@@ -93,9 +93,6 @@ code, kbd, pre { font-family: var(--mono); }
 .lic-list li svg { margin-top: 2px; color: var(--axis); }
 .lic-list li.info { color: var(--ink); margin-top: 4px; }
 .lic-list li.info svg { color: var(--accent); }
-.lic-list li.foot { margin-top: 4px; font-size: 13.5px; color: var(--ink-2); }
-.lic-list a, .d-lucide a { color: var(--accent); }
-.d-lucide { margin: 0 0 14px; padding: 10px 12px; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; }
 .facts { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 20px 0 0; }
 .facts li { font: 500 12.5px/1 var(--mono); padding: 7px 10px; border-radius: 6px; background: var(--surface-2); color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .facts b { color: var(--ink); font-weight: 600; }

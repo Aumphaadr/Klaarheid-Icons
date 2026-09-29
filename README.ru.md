@@ -6,7 +6,7 @@
 
 <p align="center">
   Точные открытые иконки — <b>построены, а не обведены</b>.<br>
-  <!--count-->407<!--/count--> иконок на сетке 24 с линией 2&nbsp;px — контуром заливкой и линией.
+  <!--count-->417<!--/count--> иконок на сетке 24 с линией 2&nbsp;px — контуром заливкой и линией.
 </p>
 
 <p align="center">
@@ -56,7 +56,7 @@
 |---|---|---|
 | Что внутри | один залитый `<path>`: точный контур | осевые линии: `stroke-width="2"`, круглые торцы и стыки |
 | Цвет | `fill="currentColor"` | `stroke="currentColor"` |
-| Когда брать | нужна точная форма: спрайты, иконочные шрифты, редакторы | удобно править линию стилями, как у Lucide или Feather |
+| Когда брать | нужна точная форма: спрайты, иконочные шрифты, редакторы | удобно править линию стилями |
 
 Обе версии рисуют одну и ту же картинку: контур вычислен из линии.
 
@@ -117,7 +117,6 @@ npm run serve          # посмотреть docs/ на http://localhost:8080
 | `src/icons.mjs` | описание иконок — единственный источник |
 | `src/geom.mjs` | геометрическое ядро: смещение отрезков и дуг, стыки, объединение, вырезы, канонические кубики |
 | `src/meta.mjs` | каталог для сайта: категории, русские названия, слова для поиска |
-| `src/third-party.mjs` | иконки, совпадающие с иконками Lucide и Tabler (см. [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)) |
 | `svg/` | собранные иконки (генерируются) |
 | `tools/` | сборка, проверка, сайт и просмотр |
 | `site/` | страница сайта: `index.html`, `app.css`, `app.js`, шрифты |
@@ -133,12 +132,7 @@ npm run serve          # посмотреть docs/ на http://localhost:8080
 ## Благодарности
 
 Первые иконки нарисованы для проектов автора — [Idyllium](https://github.com/Aumphaadr/Idyllium),
-[SignoreBot](https://github.com/Aumphaadr/SignoreBot) и ООМ. Композиции многих иконок общего назначения следуют
-общепринятым рисункам [Lucide](https://lucide.dev) и [Feather](https://feathericons.com). Каждая иконка построена
-в коде из примитивов, но на той же сетке и той же линией, что у Lucide и [Tabler Icons](https://tabler.io/icons),
-поэтому часть иконок вышла такой же, как в этих наборах: с Lucide совпали <!--lucide-count-->101<!--/lucide-count-->,
-с Tabler — <!--tabler-count-->24<!--/tabler-count-->; в основном это простые знаки вроде плюса, шевронов и стрелок. Они
-перечислены в [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), на них действует и лицензия Lucide (ISC) или Tabler (MIT).
+[SignoreBot](https://github.com/Aumphaadr/SignoreBot) и ООМ.
 
 Сайт набран шрифтами [Onest](https://github.com/simpals/onest) и
 [Source Code Pro](https://github.com/adobe-fonts/source-code-pro) — оба под SIL Open Font License 1.1;
@@ -156,10 +150,5 @@ npm run serve          # посмотреть docs/ на http://localhost:8080
 - без разрешений и без упоминания автора — ни в интерфейсе, ни на сайте, ни в титрах;
 - совсем без условий: даже текст лицензии прикладывать к файлам не нужно;
 - иконки можно менять: перекрашивать, перерисовывать, включать в свои наборы и шрифты.
-
-Сноска: иконок, совпадающих с иконками Lucide, — <!--lucide-count-->101<!--/lucide-count-->, с иконками Tabler —
-<!--tabler-count-->24<!--/tabler-count-->; на них действует и лицензия Lucide (ISC) или Tabler (MIT) — используете их,
-сохраняйте текст нужной лицензии. Списки и тексты — в [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), на сайте такие
-иконки помечены в карточке.
 
 Неофициальный перевод лицензии на русский — [LICENSE_RU.md](LICENSE_RU.md).

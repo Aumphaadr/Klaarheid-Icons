@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M6 2H14L20 8V20C20 21.104569 19.104569 22 18 22H6C4.895431 22 4 21.104569 4 20V4C4 2.895431 4.895431 2 6 2Z"/>
-  <path d="M14 3V6C14 7.104569 14.895431 8 16 8H19"/>
-  <path d="M7.75 3.5H9.25" stroke-width="1.5"/>
-  <path d="M9.25 4.75H10.75" stroke-width="1.5"/>
-  <path d="M7.75 6H9.25" stroke-width="1.5"/>
-  <path d="M9.25 7.25H10.75" stroke-width="1.5"/>
-  <path d="M7.75 8.5H9.25" stroke-width="1.5"/>
-  <path d="M9.25 9.75H10.75" stroke-width="1.5"/>
-  <rect x="7.75" y="11" width="3" height="5" rx="1.5" stroke-width="1.5"/>
+  <path d="M7 2H14L19 7V20C19 21.104569 18.104569 22 17 22H7C5.895431 22 5 21.104569 5 20V4C5 2.895431 5.895431 2 7 2Z"/>
+  <path d="M14 2V7H19L14 2Z" fill="currentColor"/>
+  <path d="M8.25 3.5H9.5" stroke-width="1.5"/>
+  <path d="M9.5 4.75H10.75" stroke-width="1.5"/>
+  <path d="M8.25 6H9.5" stroke-width="1.5"/>
+  <path d="M9.5 7.25H10.75" stroke-width="1.5"/>
+  <path d="M8.25 8.5H9.5" stroke-width="1.5"/>
+  <path d="M9.5 9.75H10.75" stroke-width="1.5"/>
+  <rect x="8.25" y="11" width="2.5" height="5" rx="1.25" stroke-width="1.5"/>
 </svg>

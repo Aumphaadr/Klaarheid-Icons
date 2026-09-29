@@ -3,4 +3,5 @@
   <circle cx="6" cy="7" r="1" fill="currentColor" stroke="none"/>
   <circle cx="10" cy="7" r="1" fill="currentColor" stroke="none"/>
   <circle cx="14" cy="7" r="1" fill="currentColor" stroke="none"/>
+  <path d="M2 10.5H22" stroke-width="1.5"/>
 </svg>
