@@ -6,7 +6,7 @@
 
 <p align="center">
   Precise open-source icons — <b>constructed, not traced</b>.<br>
-  <!--count-->417<!--/count--> icons on a 24 grid with a 2&nbsp;px line, as filled outlines and as strokes.
+  <!--count-->553<!--/count--> icons on a 24 grid with a 2&nbsp;px line, as filled outlines and as strokes.
 </p>
 
 <p align="center">

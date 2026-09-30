@@ -5,7 +5,7 @@
 // { disk: [центр, r] } — залитый круг; { dot: центр } — точка диаметром w;
 // { capsule: [a, b, r] } — толстая линия постоянной ширины 2r (как диск, от толщины сборки не зависит);
 // { fill: путь } — чистая заливка по замкнутому пути, без линии по краю (как диск).
-import { line, circle, polyline, rect, path, arc, chainPath, L, cutPath, cutPathStrip, cutPathRegion, capsuleRegion, edgeLen, subEdge } from './geom.mjs';
+import { line, circle, polyline, rect, path, arc, chainPath, L, cutPath, cutPathStrip, cutPathRegion, capsuleRegion, edgeLen, subEdge, pointAt, fillPiece } from './geom.mjs';
 
 const R3 = Math.sqrt(3), S2 = Math.SQRT2;
 const rot90 = (p) => [24 - p[1], p[0]]; // поворот на 90° по часовой вокруг (12, 12)
@@ -147,7 +147,9 @@ function braceRight(xe, y0, y1, r = 2) {
 // луна: серп рогами вправо — наружная дуга r 10 вокруг (14,5; 12) от 60° до 300° через лево, внутренняя — через рога
 // вокруг (18,5; 12), r √76 (толщина серпа посередине 5,3)
 const moonR = Math.sqrt(76), moonA = Math.atan2(-10 * Math.sin(Math.PI / 3), 1) / D2R + 360;
-const moonPath = chainPath([arc([14.5, 12], 10, 60, 240), arc([18.5, 12], moonR, moonA, 360 - 2 * moonA)], true);
+// (moonPathAt — тот же серп вокруг O в масштабе k: для луны за облаком)
+const moonPathAt = (O, k) => chainPath([arc(O, 10 * k, 60, 240), arc([O[0] + 4 * k, O[1]], moonR * k, moonA, 360 - 2 * moonA)], true);
+const moonPath = moonPathAt([14.5, 12], 1);
 // звено цепи: капсула r 4 вдоль диагонали x + y = 24; ближний торец проходит через центр ближнего
 // торца другого звена (p = 4 / 2√2) — путь начинается там же, в середине чужой петли. Разрыв там, где
 // сверху идёт другое звено: конец заглушки — на расстоянии 4 от его осевой (просвет 2)
@@ -278,6 +280,9 @@ const BADGE_C = [18.5, 18.5], BADGE_CUT = 7;
 const badgeGlyph = {
   x: (c, a = 2.5) => [S(line([c[0] - a, c[1] - a], [c[0] + a, c[1] + a])), S(line([c[0] + a, c[1] - a], [c[0] - a, c[1] + a]))],
   plus: (c, a = 3) => [S(line([c[0], c[1] - a], [c[0], c[1] + a])), S(line([c[0] - a, c[1]], [c[0] + a, c[1]]))],
+  minus: (c, a = 2.5) => [S(line([c[0] - a, c[1]], [c[0] + a, c[1]]))],
+  // галочка 1 : 2 — плечи k и 2k по диагоналям, рамка 3k × 2k с центром c
+  check: (c, k = 1.5) => [S(polyline([[c[0] - 1.5 * k, c[1]], [c[0] - 0.5 * k, c[1] + k], [c[0] + 1.5 * k, c[1] - k]]))],
   // круговая стрелка: дуга r 3 на 270°, головка с осью 45° (плечи по осям), как у rotate
   repeat: (c) => {
     const r = 3, head = 2.5, axisDeg = 45, delta = ((head * Math.SQRT1_2) / r) / D2R, tip = axisDeg - 90 + delta / 2;
@@ -293,7 +298,36 @@ const trimTails = (pp, min = 2) => {
   while (e.length > 1 && edgeLen(e[0]) < min) e.shift();
   return path(e, false);
 };
-const withBadge = (baseParts, glyph, c = BADGE_C) => [...baseParts.flatMap((p) => (p.stroke ? cutPath(p.stroke, c, BADGE_CUT).map((q) => S(trimTails(q))) : [p])), ...badgeGlyph[glyph](c)];
+// точки основы ближе 7 к центру бейджа уходят (до знака было бы меньше 2); args — размер знака
+const withBadge = (baseParts, glyph, c = BADGE_C, ...args) => [...baseParts.flatMap((p) => (p.stroke ? cutPath(p.stroke, c, BADGE_CUT).map((q) => S(trimTails(q)))
+  : (p.dot || p.disk) && Math.hypot((p.dot ?? p.disk[0])[0] - c[0], (p.dot ?? p.disk[0])[1] - c[1]) < BADGE_CUT ? [] : [p])), ...badgeGlyph[glyph](c, ...args)];
+// тонкие знаки внутри контейнеров (лист, папка, закладка) вокруг центра c: плюс и крестик — как у file-plus и file-x,
+// галочка 1 : 2, лупа — кольцо r и ручка под 45° до (c + e + 0,25; c + e)
+const innerGlyph = {
+  plus: (c, a = 3) => [T(line([c[0], c[1] - a], [c[0], c[1] + a])), T(line([c[0] - a, c[1]], [c[0] + a, c[1]]))],
+  minus: (c, a = 3) => [T(line([c[0] - a, c[1]], [c[0] + a, c[1]]))],
+  x: (c, a = 2.5) => [T(line([c[0] - a, c[1] - a], [c[0] + a, c[1] + a])), T(line([c[0] + a, c[1] - a], [c[0] - a, c[1] + a]))],
+  check: (c, k = 2) => [T(polyline([[c[0] - 1.5 * k, c[1]], [c[0] - 0.5 * k, c[1] + k], [c[0] + 1.5 * k, c[1] - k]]))],
+  search: (c, r = 2.5, e = 3) => { const L0 = [c[0] - 1, c[1] - 1.25]; return [T(circle(L0, r)), T(line(pt(L0, r, 45), [c[0] + e + 0.25, c[1] + e]))]; },
+};
+// «есть новое»: сплошная точка r 3 в правом верхнем углу поля (17..23 × 1..7 — вровень с краем, как бейджи), основа
+// вырезана вокруг с просветом 2; обрезки короче 2 не остаются
+const NEWS_DOT = [20, 4];
+// «активно» — заливка по основе: замкнутые линии становятся сплошными (силуэт тот же), тонкие черты внутри уходят
+const fillParts = (parts) => parts.filter((p) => !p.thin).map((p) => (p.stroke?.closed ? { solid: p.stroke } : p));
+// заливка с вырезом: рамка (первая замкнутая линия) становится заливкой, знаки внутри неё — вырезами (holes; замкнутый
+// знак — сплошным вырезом), то, что выходит за рамку (дужка замка), остаётся как было
+const partPoints = (p) => (p.disk ? [p.disk[0]] : p.dot ? [p.dot] : (p.stroke ?? p.solid).edges.flatMap((e) => [0, 0.5, 1].map((t) => pointAt(e, t))));
+const fillHoled = (parts) => {
+  const k = parts.findIndex((p) => p.stroke?.closed), frame = fillPiece(parts[k].stroke), holes = [], rest = [];
+  parts.forEach((p, i) => {
+    if (i === k) return;
+    if (!partPoints(p).every((q) => frame.bd(q) < 0)) rest.push(p);
+    else holes.push(p.stroke?.closed ? { solid: p.stroke, ...(p.thin ? { thin: true } : {}) } : p);
+  });
+  return [{ solid: parts[k].stroke, holes }, ...rest];
+};
+const withDot = (baseParts) => [...baseParts.flatMap((p) => (p.stroke ? cutPath(p.stroke, NEWS_DOT, 6).filter((q) => pathLen(q) >= 2).map((q) => ({ ...p, stroke: trimTails(q) })) : [p])), { disk: [NEWS_DOT, 3] }];
 // человек для знака сбоку: голова r 3,5 и плечи r 7, сдвинут влево (ось x = 9)
 const personLeft = [S(circle([9, 7], 3.5)), S(path([arc([9, 21.5], 7, 180, 180)]))];
 
@@ -401,6 +435,42 @@ function turtle() {
 // ===== девятая партия: остаток SignoreBot — по композиции оригиналов бота =====
 const sweepTo = (a, b) => ((b - a) % 360 + 360) % 360; // угол по возрастанию от a до b
 // «выключено» с просветом 2 по обе стороны косой (как eye-off): вырезана полоса |s| < 4
+// «выключено» (21-я партия): косая вдоль (1; 1), сдвинутая на d вправо вверх (d < 0 — влево вниз), концы — на квадрате
+// 4..20; основа отступает от неё на 2 с обеих сторон (тонкие детали — на 1,5): линии режутся полосой, сплошные
+// многоугольники обрезаются по ней же, диски и точки, до которых ближе, уходят; огрызки короче minLen — тоже.
+// anti — обратная косая (20; 4)–(4; 20): трубка телефона лежит по главной диагонали, и та срезала бы оба её конца
+function offParts(parts, d = 0, { anti = false, minLen = 2 } = {}) {
+  const n = anti ? [Math.SQRT1_2, Math.SQRT1_2] : SLASH_N, P0 = vadd([12, 12], vmul(n, d)), k = d * Math.SQRT2;
+  if (anti && d) throw new Error('offParts: обратная косая — только через центр');
+  const a = anti ? [20, 4] : [4 + Math.max(0, k), 4 + Math.max(0, -k)], b = anti ? [4, 20] : [20 - Math.max(0, -k), 20 - Math.max(0, k)];
+  const sOf = (q) => (q[0] - P0[0]) * n[0] + (q[1] - P0[1]) * n[1];
+  // многоугольник, срезанный полуплоскостью f ≥ 0
+  const clip = (pts, f) => pts.flatMap((q, i) => {
+    const r = pts[(i + 1) % pts.length], fq = f(q), fr = f(r), out = fq >= 0 ? [q] : [];
+    return (fq >= 0) !== (fr >= 0) ? [...out, vadd(q, vmul(vsub(r, q), fq / (fq - fr)))] : out;
+  });
+  const area = (pts) => Math.abs(pts.reduce((acc, q, i) => { const r = pts[(i + 1) % pts.length]; return acc + q[0] * r[1] - r[0] * q[1]; }, 0)) / 2;
+  const out = [];
+  for (const p of parts) {
+    if (p.stroke) {
+      const lim = p.thin ? 3.25 : 4;
+      for (const q of cutPathStrip(p.stroke, P0, n, -lim, lim)) if (pathLen(q) >= minLen) out.push({ ...p, stroke: snapToAxes(trimTails(q)) });
+    } else if (p.solid || p.fill) {
+      const key = p.solid ? 'solid' : 'fill', pp = p[key], lim = p.solid ? 4 : 3;
+      if (pp.edges.some((e) => e.t !== 'L')) {
+        if (pp.edges.every((e) => [0, 0.25, 0.5, 0.75, 1].every((t) => Math.abs(sOf(pointAt(e, t))) >= lim))) out.push(p);
+        else throw new Error('offParts: сплошная деталь с дугами попала под косую');
+        continue;
+      }
+      const pts = pp.edges.map((e) => e.a);
+      for (const f of [(q) => sOf(q) - lim, (q) => -sOf(q) - lim]) { const c = clip(pts, f); if (c.length >= 3 && area(c) > 0.5) out.push({ ...p, [key]: polyline(c, { closed: true }) }); }
+    } else if (p.disk) { if (Math.abs(sOf(p.disk[0])) >= p.disk[1] + 3) out.push(p); }
+    else if (p.dot) { if (Math.abs(sOf(p.dot)) >= (p.thin ? 3.25 : 4)) out.push(p); }
+    else if (p.capsule) { const [c0, c1, r] = p.capsule; if (Math.sign(sOf(c0)) === Math.sign(sOf(c1)) && Math.min(Math.abs(sOf(c0)), Math.abs(sOf(c1))) >= r + 3) out.push(p); }
+    else out.push(p);
+  }
+  return [...out, S(line(a, b))];
+}
 const cutBothSides = (parts, P0) => parts.flatMap((p) => (p.stroke ? cutPathStrip(p.stroke, P0, SLASH_N, -4, 4).filter((q) => pathLen(q) >= 2).map((q) => S(snapToAxes(trimTails(q)))) : []));
 // овал с вертикальной большой осью (раструб рупора): тот же чертёжный овал, повёрнутый на 90°
 function ovalVert(cx, cy, av, bh, r1) {
@@ -617,11 +687,13 @@ function paperclip() {
 }
 // флажок: древко x = 4, полотнище 4..20 × 4..14; верх и низ — одна и та же волна из двух дуг с перегибом посередине
 // (провис 1,5 на хорде 8), правый край прямой, полотнище кончается на осевой древка
-function flagParts() {
+// (заливка flag-fill — полотнище замкнуто по осевой древка)
+function flagParts(fill = false) {
   const R = (16 + 2.25) / 3, a = Math.asin(4 / R) / D2R;
   const wave = (y) => [arc([8, y + R - 1.5], R, -90 - a, 2 * a), arc([16, y - R + 1.5], R, 90 + a, -2 * a)];
   const back = (e) => ({ ...e, a0: e.a0 + e.da, da: -e.da });
-  return [S(line([4, 22], [4, 3])), S(chainPath([...wave(4), L([20, 4], [20, 14]), ...wave(14).reverse().map(back)]))];
+  const cloth = [...wave(4), L([20, 4], [20, 14]), ...wave(14).reverse().map(back)];
+  return [S(line([4, 22], [4, 3])), fill ? { solid: chainPath([...cloth, L([4, 14], [4, 4])], true) } : S(chainPath(cloth))];
 }
 // большой палец: кулак 9..21 × 10..21, палец — капсула шириной 4 от левого края кулака вверх до 3, складки пальцев —
 // две тонкие черты от правого края; манжета — сплошная полоса 3..5 отдельно, в 2 от кулака. Палец вниз — отражение
@@ -1030,6 +1102,63 @@ P20.contact = [S(rect(3, 2, 15, 20, 2)), ...[7, 12, 17].map((y) => S(line([18, y
 // амбушюры ко рту
 P20.headset = [S(path([arc([12, 11], 8, 180, 180)])), S(rect(2, 11, 4, 7, 2)), S(rect(18, 11, 4, 7, 2)), S(chainPath([arc([17, 18], 3, 0, 90), L([17, 21], [14, 21])]))];
 
+// ===== двадцать вторая партия: помощники =====
+// сотовый сигнал: четыре столбика — капсулы r 1,5 на x = 4,5, 9,5, 14,5 и 19,5 от 20 вверх до 16, 12, 8 и 4 (между
+// ними просвет 2); незанятое место — диск r 1,5 у основания
+const signalParts = (n) => [4.5, 9.5, 14.5, 19.5].map((x, i) => (i < n ? { capsule: [[x, 20], [x, 16 - 4 * i], 1.5] } : { disk: [[x, 20], 1.5] }));
+// громкость: динамик как у volume
+const volumeSpeaker = S(polyline([[2, 9], [6, 9], [11, 4], [11, 20], [6, 15], [2, 15]], { closed: true, r: [1.5, 0, 0, 0, 0, 1.5] }));
+// прогресс по долям: дорожка — прямоугольник 2..22 × 7..17 со скруглением r 3 (капсула с полосой в четверть читалась
+// выключенным переключателем), заполнение — сплошной брусок 6..18 × 11..13 на долю длины (до дорожки просвет 2)
+const progressParts = (f) => [S(rect(2, 7, 20, 10, 3)), ...(f > 0 ? [{ solid: rect(6, 11, 12 * f, 2) }] : [])];
+// круговой прогресс: кольцо и сплошной сектор от верха по часовой, до осевой кольца — сливается с ним (сектор отдельно
+// от кольца повторял бы значки контраста и часов на 3:00)
+const pieParts = (sweep) => [ring, { solid: chainPath([L([12, 12], [12, 3]), arc([12, 12], 9, 270, sweep), L(pt([12, 12], 9, 270 + sweep), [12, 12])], true) }];
+// песочные часы: рама как у hourglass; песок — сплошная фигура по осевым стенок (сливается с ними)
+const hourglassFrame = [S(line([5, 3], [19, 3])), S(line([5, 21], [19, 21])),
+  S(polyline([[7, 3], [7, 7], [12, 12], [7, 17], [7, 21]], { r: [0, 2, 0, 2, 0] })), S(polyline([[17, 3], [17, 7], [12, 12], [17, 17], [17, 21]], { r: [0, 2, 0, 2, 0] }))];
+const sandTop = polyline([[7, 3], [17, 3], [17, 7], [12, 12], [7, 7]], { closed: true, r: [0, 0, 2, 0, 2] });
+const sandBottom = polyline([[7, 21], [17, 21], [17, 17], [12, 12], [7, 17]], { closed: true, r: [0, 0, 2, 0, 2] });
+// яркость: лучи солнца — через 30°; тусклое — точки r 1 на 9, среднее — длинный луч и точка через один
+const SUN_RAYS = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
+
+// боковая панель: рамка 3..21 и сплошная панель 3..8 (слева) или 16..21 (справа)
+const panelParts = (right = false) => [S(rect(3, 3, 18, 18, 2)), { solid: right
+  ? polyline([[16, 3], [21, 3], [21, 21], [16, 21]], { closed: true, r: [0, 2, 2, 0] })
+  : polyline([[3, 3], [8, 3], [8, 21], [3, 21]], { closed: true, r: [2, 0, 0, 2] }) }];
+
+// ===== двадцать шестая партия: помощники =====
+// облако из трёх горбов, как cloudPath, но с любыми кругами: крайние касаются низа, средний выше
+function cloudOf([[Lc, rl], [Bc, rb], [Rc, rr]]) {
+  const yb = Lc[1] + rl, J1 = circlesMeet(Lc, rl, Bc, rb)[0], J2 = circlesMeet(Bc, rb, Rc, rr)[0], b1 = angOf(Bc, J1), c2 = angOf(Rc, J2);
+  return chainPath([arc(Lc, rl, 90, sweepTo(90, angOf(Lc, J1))), arc(Bc, rb, b1, sweepTo(b1, angOf(Bc, J2))), arc(Rc, rr, c2, sweepTo(c2, 90)),
+    L([Rc[0], yb], [Lc[0], yb])], true);
+}
+// малое облако для солнца и луны за облаком: горбы r 3, 4,5 и 3,5, низ на 21, по краю 6,5..23
+const SMALL_CLOUD = [[[10.5, 18], 3], [[14.5, 14.5], 4.5], [[18.5, 17.5], 3.5]];
+// то, что за облаком: линии срезаны ближе 4 к окружностям горбов (просвет 2), обрезки короче 2 уходят; лучи (ray) —
+// целиком или никак
+const behindCloud = (parts, bumps) => parts.flatMap((p) => {
+  if (p.ray) return bumps.every(([c, r]) => capsuleRegion(...p.ray, 0)(c) >= r + 4) ? [S(line(...p.ray))] : [];
+  return cutPathRegion(p.stroke, (q) => Math.min(...bumps.map(([c, r]) => Math.hypot(q[0] - c[0], q[1] - c[1]) - (r + 4))))
+    .filter((q) => pathLen(q) >= 2).map((q) => S(q));
+});
+
+// ===== двадцать пятая партия: помощники =====
+// грань кубика: точки на сетке 6,5 / 12 / 17,5; двойка и тройка — по диагонали из левого верхнего угла
+const DIE_PIPS = { 1: [[12, 12]], 2: [[6.5, 6.5], [17.5, 17.5]], 3: [[6.5, 6.5], [12, 12], [17.5, 17.5]], 4: [[6.5, 6.5], [17.5, 6.5], [6.5, 17.5], [17.5, 17.5]] };
+DIE_PIPS[5] = [...DIE_PIPS[4], [12, 12]];
+DIE_PIPS[6] = [...DIE_PIPS[4], [6.5, 12], [17.5, 12]];
+const dieFace = (n) => [S(rect(2, 2, 20, 20, 3)), ...DIE_PIPS[n].map((c) => ({ disk: [c, 1.5] }))];
+
+// ===== двадцать третья партия: помощники =====
+// стрелка звонка — по диагонали в свободном углу трубки: головка — уголок с плечами 4 по осям, древко кончается за 1
+// до вершины (как у arrow-up-right)
+const callArrow = (tip, tail) => {
+  const d = Math.sign(tail[0] - tip[0]), e = Math.sign(tail[1] - tip[1]);
+  return [S(polyline([[tip[0], tip[1] + 4 * e], tip, [tip[0] + 4 * d, tip[1]]])), S(line(tail, [tip[0] + d, tip[1] + e]))];
+};
+
 export const ICONS = [
   // --- медиа ---
   { name: 'play', parts: [{ stroke: tri(playTri) }] },
@@ -1208,8 +1337,8 @@ export const ICONS = [
   { name: 'select', batch: 3, parts: [S(field), S(polyline([[14, 11], [16, 13], [18, 11]]))] },
   { name: 'input-number', batch: 3, parts: [S(spinField), S(line([6, 12], [10, 12])), ...spinChevrons] },
   { name: 'input-decimal', batch: 3, parts: [S(spinField), S(line([6, 12], [7.5, 12])), { dot: [11.5, 12] }, ...spinChevrons] },
-  // полоса: капсула r 5, заполнение — капсула r 2 с тем же центром левого торца (просвет 2 по всему торцу)
-  { name: 'progress', batch: 3, parts: [S(rect(2, 7, 20, 10, 5)), { capsule: [[7, 12], [14, 12], 2] }] },
+  // полоса: как у progress-0 … progress-100 (22-я партия), заполнено на 2/3
+  { name: 'progress', batch: 3, parts: progressParts(2 / 3) },
   // многострочное поле: рамка 2..22 × 4..20, две строки и уголок-ручка — две тонкие косые в правом нижнем углу
   { name: 'textarea', batch: 3, parts: [S(rect(2, 4, 20, 16, 2)), S(line([6, 8], [18, 8])), S(line([6, 12], [11, 12])), T(line([18.75, 14.25], [16.25, 16.75])), T(line([17.5, 11.25], [12, 16.75]))] },
   { name: 'table', batch: 3, parts: [S(rect(3, 5, 18, 14, 2)), S(line([3, 10], [21, 10])), S(line([9, 5], [9, 19])), S(line([15, 5], [15, 19]))] },
@@ -1410,8 +1539,8 @@ export const ICONS = [
   // вниз к черте: головка с плечами 4, острие на 16, черта 5..19 на 21
   { name: 'arrow-down-to-line', batch: 6, parts: [S(line([12, 3], [12, 15])), S(polyline([[8, 12], [12, 16], [16, 12]])), S(line([5, 21], [19, 21]))] },
   // боковые панели: панель сплошная, 3..8 или 16..21
-  { name: 'panel-left', batch: 6, parts: [S(rect(3, 3, 18, 18, 2)), { solid: polyline([[3, 3], [8, 3], [8, 21], [3, 21]], { closed: true, r: [2, 0, 0, 2] }) }] },
-  { name: 'panel-right', batch: 6, parts: [S(rect(3, 3, 18, 18, 2)), { solid: polyline([[16, 3], [21, 3], [21, 21], [16, 21]], { closed: true, r: [0, 2, 2, 0] }) }] },
+  { name: 'panel-left', batch: 6, parts: panelParts() },
+  { name: 'panel-right', batch: 6, parts: panelParts(true) },
   // вписать: четыре уголка со скруглением r 2, углы в 2 от края, плечи 5
   { name: 'scan', batch: 6, parts: [[[2, 7], [2, 2], [7, 2]], [[17, 2], [22, 2], [22, 7]], [[22, 17], [22, 22], [17, 22]], [[7, 22], [2, 22], [2, 17]]].map((q) => S(polyline(q, { r: 2 }))) },
 
@@ -1747,4 +1876,143 @@ export const ICONS = [
   { name: 'languages', batch: 20, parts: P20.languages },
   { name: 'contact', batch: 20, parts: P20.contact },
   { name: 'headset', batch: 20, parts: P20.headset },
+
+  // ===== двадцать вторая партия: уровни =====
+  // состояния рисуются на месте основы: wi-fi — меньше дуг, сигнал — меньше столбиков, громкость — одна волна, прогресс —
+  // полоса на 0, ¼, ½, ¾ и всю дорожку, песочные часы — песок вверху, поровну и внизу, яркость — лучи точками и через один
+  { name: 'wifi-low', batch: 22, parts: [wifiArcs[0], { disk: [wifiC, 1.5] }] },
+  { name: 'wifi-medium', batch: 22, parts: [wifiArcs[0], wifiArcs[1], { disk: [wifiC, 1.5] }] },
+  { name: 'signal', batch: 22, parts: signalParts(4) },
+  { name: 'signal-high', batch: 22, parts: signalParts(3) },
+  { name: 'signal-medium', batch: 22, parts: signalParts(2) },
+  { name: 'signal-low', batch: 22, parts: signalParts(1) },
+  { name: 'volume-low', batch: 22, parts: [volumeSpeaker, S(path([arc([12, 12], 5.5, -45, 90)]))] },
+  { name: 'progress-0', batch: 22, parts: progressParts(0) },
+  { name: 'progress-25', batch: 22, parts: progressParts(0.25) },
+  { name: 'progress-50', batch: 22, parts: progressParts(0.5) },
+  { name: 'progress-75', batch: 22, parts: progressParts(0.75) },
+  { name: 'progress-100', batch: 22, parts: progressParts(1) },
+  { name: 'circle-quarter', batch: 22, parts: pieParts(90) },
+  { name: 'circle-half', batch: 22, parts: pieParts(180) },
+  { name: 'circle-three-quarters', batch: 22, parts: pieParts(270) },
+  { name: 'hourglass-top', batch: 22, parts: [...hourglassFrame, { solid: sandTop }] },
+  { name: 'hourglass-half', batch: 22, parts: [...hourglassFrame, { solid: polyline([[8, 8], [16, 8], [12, 12]], { closed: true }) }, { solid: polyline([[7, 21], [17, 21], [17, 18.5], [7, 18.5]], { closed: true }) }] },
+  { name: 'hourglass-bottom', batch: 22, parts: [...hourglassFrame, { solid: sandBottom }] },
+  { name: 'sun-dim', batch: 22, parts: [S(circle([12, 12], 4)), ...SUN_RAYS.map((d) => ({ dot: pt([12, 12], 9, d) }))] },
+  { name: 'sun-medium', batch: 22, parts: [S(circle([12, 12], 4)), ...SUN_RAYS.map((d, k) => (k % 2 ? { dot: pt([12, 12], 9, d) } : S(line(pt([12, 12], 8, d), pt([12, 12], 10, d)))))] },
+
+  // ===== двадцать третья партия: статусы и новое =====
+  // статус задачи: пунктирный круг — не начато, пустой — к работе; дальше circle-half, circle-check, circle-x и
+  // circle-pause. Круг — кольцо значков circle-*; пунктир — 8 дуг по 20° на том же r 10, просветы на осях и диагоналях
+  { name: 'circle', batch: 23, parts: [ring] },
+  { name: 'circle-dashed', batch: 23, parts: [0, 45, 90, 135, 180, 225, 270, 315].map((a) => S(path([arc([12, 12], 10, a + 12.5, 20)]))) },
+  // звонок: трубка как у phone, знак — в её свободном углу 14,5..20,5 × 3,5..9,5 (там же волны phone-call); пропущенный —
+  // крестик как у бейджей
+  { name: 'phone-incoming', batch: 23, parts: [...phoneParts(), ...callArrow([14.5, 9.5], [20.5, 3.5])] },
+  { name: 'phone-outgoing', batch: 23, parts: [...phoneParts(), ...callArrow([20.5, 3.5], [14.5, 9.5])] },
+  { name: 'phone-missed', batch: 23, parts: [...phoneParts(), ...badgeGlyph.x([17.5, 6.5])] },
+  // облако-хранилище: облако как у cloud-rain, открытое снизу; галочка как у circle-check, стрелки — с головкой
+  // с плечами 3,5 по диагоналям, древко кончается за 1 до вершины
+  { name: 'cloud-check', batch: 23, parts: [S(cloudPath(-3, true)), S(polyline([[8, 17], [11, 20], [16, 15]]))] },
+  { name: 'cloud-upload', batch: 23, parts: [S(cloudPath(-3, true)), S(line([12, 21], [12, 12])), S(polyline([[8.5, 14.5], [12, 11], [15.5, 14.5]]))] },
+  { name: 'cloud-download', batch: 23, parts: [S(cloudPath(-3, true)), S(line([12, 10], [12, 20])), S(polyline([[8.5, 17.5], [12, 21], [15.5, 17.5]]))] },
+
+  // ===== двадцать четвёртая партия: открыто и активно =====
+  // открытая коробка: корпус 5..19 × 9..21 и створки-параллелограммы (7 по кромке, высота 6), раскрытые наружу с наклоном
+  // 3 : 6 — зеркально скатам крышки package; створки сходятся на середине кромки
+  { name: 'package-open', batch: 24, parts: [S(polyline([[5, 9], [5, 21], [19, 21], [19, 9]], { closed: true, r: [0, 2, 2, 0] })),
+    S(polyline([[5, 9], [12, 9], [9, 3], [2, 3]], { closed: true })), S(polyline([[12, 9], [19, 9], [22, 3], [15, 3]], { closed: true }))] },
+  // дверь: коробка 5..19 × 2..22 без скруглений, ручка — точка (15; 12). Открытая — створка внутрь, трапеция в перспективе:
+  // петли на левом косяке, свободный край на 14 короче на 2 сверху и снизу, ручка (10; 12); до краёв просвет не меньше 2
+  { name: 'door', batch: 24, parts: [S(polyline([[5, 22], [5, 2], [19, 2], [19, 22]])), { dot: [15, 12] }] },
+  { name: 'door-open', batch: 24, parts: [S(polyline([[5, 22], [5, 2], [19, 2], [19, 22]])), S(polyline([[5, 2], [14, 4], [14, 20], [5, 22]])), { dot: [10, 12] }] },
+  // панели со стрелкой: шеврон с плечами 4 посередине свободной части (до панели и рамки просвет 2,5); «открыть» смотрит
+  // от панели, «закрыть» — к ней
+  { name: 'panel-left-open', batch: 24, parts: [...panelParts(), S(polyline([[12.5, 8], [16.5, 12], [12.5, 16]]))] },
+  { name: 'panel-left-close', batch: 24, parts: [...panelParts(), S(polyline([[16.5, 8], [12.5, 12], [16.5, 16]]))] },
+  { name: 'panel-right-open', batch: 24, parts: [...panelParts(true), S(polyline([[11.5, 8], [7.5, 12], [11.5, 16]]))] },
+  { name: 'panel-right-close', batch: 24, parts: [...panelParts(true), S(polyline([[7.5, 8], [11.5, 12], [7.5, 16]]))] },
+  // заливка — «включено» у переключаемых значков: закладка, булавка, лайки и колокольчик — после массива (fillParts)
+  { name: 'flag-fill', batch: 24, parts: flagParts(true) },
+
+  // ===== двадцать пятая партия: лица, кубик, щиты =====
+  // лица — кольцо и глаза-кольца как у smile и frown: равнодушие — прямой рот 8,5..15,5 на 16 (концы под центрами глаз),
+  // смех — сплошной полукруг r 3 под чертой на 15 (до глаз и до обода просвет 2)
+  { name: 'meh', batch: 25, parts: [ring, ...faceEyes, S(line([8.5, 16], [15.5, 16]))] },
+  { name: 'laugh', batch: 25, parts: [ring, ...faceEyes, { solid: chainPath([arc([12, 15], 3, 0, 180), L([9, 15], [15, 15])], true) }] },
+  // грань кубика: квадрат 2..22 со скруглением r 3, точки — диски r 1,5 (между ними 2,5, до стенок 2); как у кубиков
+  // в «Кубиках», двойка и тройка идут из левого верхнего угла
+  ...[1, 2, 3, 4, 5, 6].map((n) => ({ name: `dice-${n}`, batch: 25, parts: dieFace(n) })),
+  // щит со знаком: «!» как у circle-alert, крестик 4,5 × 4,5 вокруг (12; 11,5); до боков и дуг низа просвет 2 и больше
+  { name: 'shield-alert', batch: 25, parts: [S(shieldPath()), S(line([12, 8], [12, 12])), { dot: [12, 16] }] },
+  { name: 'shield-x', batch: 25, parts: [S(shieldPath()), ...badgeGlyph.x([12, 11.5], 2.25)] },
+
+  // ===== двадцать шестая партия: погода =====
+  // переменная облачность и облачная ночь: малое облако впереди, за ним солнце — кольцо r 2,5 и 8 лучей r 6,5..8 вокруг
+  // (10; 10) — или луна moon в масштабе 0,75 вокруг (9,5; 9,5); что ближе 2 к облаку, срезано, лучи — целиком
+  { name: 'cloud-sun', batch: 26, parts: [S(cloudOf(SMALL_CLOUD)), ...behindCloud([S(circle([10, 10], 2.5)),
+    ...[0, 45, 90, 135, 180, 225, 270, 315].map((d) => ({ ray: [pt([10, 10], 6.5, d), pt([10, 10], 8, d)] }))], SMALL_CLOUD)] },
+  { name: 'cloud-moon', batch: 26, parts: [S(cloudOf(SMALL_CLOUD)), ...behindCloud([S(moonPathAt([9.5, 9.5], 0.75))], SMALL_CLOUD)] },
+  // под облаком без низа, как у дождя и снега: туман — черты 6..18 на 18 и 8..16 на 22; морось — короткие капли длиной
+  // 1,5 вразбежку (три на 15, две на 20); град — три градины r 1,5 треугольником
+  { name: 'cloud-fog', batch: 26, parts: [S(cloudPath(-3, true)), S(line([6, 18], [18, 18])), S(line([8, 22], [16, 22]))] },
+  { name: 'cloud-drizzle', batch: 26, parts: [S(cloudPath(-3, true)), ...[8, 12, 16].map((x) => S(line([x, 15], [x, 16.5]))), ...[10, 14].map((x) => S(line([x, 20], [x, 21.5])))] },
+  { name: 'cloud-hail', batch: 26, parts: [S(cloudPath(-3, true)), ...[[8, 16.5], [16, 16.5], [12, 20.5]].map((c) => ({ disk: [c, 1.5] }))] },
+
+  // ===== двадцать седьмая партия: заливка с вырезом =====
+  // знак основы вырезан из заливки (holes) — белый знак на тёмном; основы с рамкой — после массива (fillHoled). Глаз —
+  // свой: зрачок в заливке — кольцо r 3,5 с тёмным островком r 2,5 (кайма сверху и снизу — 3; при r 4 сжалась бы до 2)
+  { name: 'eye-fill', batch: 27, parts: [{ solid: eyePath, holes: [S(circle([12, 12], 3.5))] }] },
+
+  // ===== двадцать восьмая партия: модификации знаком =====
+  // приёмы прежние: внутри тонкой линией — лист и папка (лупа — кольцо r 2,5 и ручка под 45°, в папке r 2,25: тело ниже
+  // листа); внутри основной линией — метка: знак в голове на месте диска, до кольца головы просвет не меньше 2.
+  // Закладка (знак внутри) и календарь с конвертом (бейдж: внутри числа и клапан) — после массива
+  { name: 'file-check', batch: 28, parts: [...fileParts, ...innerGlyph.check([12, 15])] },
+  { name: 'file-minus', batch: 28, parts: [...fileParts, ...innerGlyph.minus([12, 15])] },
+  { name: 'file-search', batch: 28, parts: [...fileParts, ...innerGlyph.search([12, 15])] },
+  { name: 'folder-check', batch: 28, parts: [S(folderPath), ...innerGlyph.check([12, 13.5])] },
+  { name: 'folder-minus', batch: 28, parts: [S(folderPath), ...innerGlyph.minus([12, 13.5])] },
+  { name: 'folder-x', batch: 28, parts: [S(folderPath), ...innerGlyph.x([12, 13.5])] },
+  { name: 'folder-search', batch: 28, parts: [S(folderPath), ...innerGlyph.search([12, 13.75], 2.25, 2.75)] },
+  { name: 'map-pin-plus', batch: 28, parts: [mapPinParts()[0], ...badgeGlyph.plus([12, 9.5])] },
+  { name: 'map-pin-check', batch: 28, parts: [mapPinParts()[0], ...badgeGlyph.check([12, 9.5], 1.75)] },
+  { name: 'map-pin-x', batch: 28, parts: [mapPinParts()[0], ...badgeGlyph.x([12, 9.5], 2.25)] },
+  { name: 'map-pin-minus', batch: 28, parts: [mapPinParts()[0], ...badgeGlyph.minus([12, 9.5], 3)] },
+
+  // ===== двадцать первая партия: выключенные состояния =====
+  // видео для звонков: корпус 2..14 × 7..17 (r 2,5) и объектив — сплошная трапеция 18..22, расширяется от корпуса
+  { name: 'video', batch: 21, parts: [S(rect(2, 7, 12, 10, 2.5)), { solid: polyline([[18, 10.5], [22, 8], [22, 16], [18, 13.5]], { closed: true }) }] },
 ];
+
+// «выключенные» варианты: основа → сдвиг косой d (вправо вверх > 0, влево вниз < 0). Сдвиг подобран так, чтобы косая
+// резала основу поперёк и оставляла узнаваемое: у наушников — через левую чашку, у метки и навигации —
+// мимо головы и острия, у фотоаппарата — через уступ, от объектива остаётся дуга, у монитора — над подставкой
+const OFF_VARIANTS = [
+  ['video', 0], ['headphones', -3], ['camera', 4], ['image', 0], ['monitor', 3], ['smartphone', 0],
+  ['keyboard', 0], ['server', 3], ['cloud', 0], ['phone', 0, { anti: true }], ['message', 0], ['message-circle', 0],
+  ['bookmark', 0], ['flag', 0], ['map-pin', -4], ['navigation', -4], ['pencil', 0], ['link', 0], ['funnel', 4], ['search', 0],
+  ['star', 4], ['heart', 0], ['shield', 0], ['key', -2], ['lightning', -4, { minLen: 4.5 }], ['bulb', 2], ['robot', -2],
+  ['calendar', -4], ['stopwatch', -2],
+];
+{
+  const byName = new Map(ICONS.map((i) => [i.name, i]));
+  for (const [base, d, opts] of OFF_VARIANTS) ICONS.push({ name: `${base}-off`, batch: 21, parts: offParts(byName.get(base).parts, d, opts) });
+  // «есть новое» — точка в углу (withDot)
+  for (const base of ['bell', 'mail', 'message', 'message-circle']) ICONS.push({ name: `${base}-dot`, batch: 23, parts: withDot(byName.get(base).parts) });
+  // «активно» — заливка (fillParts); флажок — в массиве
+  for (const base of ['bookmark', 'pin', 'thumbs-up', 'thumbs-down', 'bell']) ICONS.push({ name: `${base}-fill`, batch: 24, parts: fillParts(byName.get(base).parts) });
+  // модификации знаком: закладка — тонкий знак вокруг (12; 9), уже листа (лента 6..18); календарь и конверт — бейджем,
+  // знак бейджа мельче, чем у воронки: плюс 5, крестик 4 — вровень с галочкой и минусом
+  const bookmarkSign = { plus: innerGlyph.plus([12, 9], 2.5), check: innerGlyph.check([12, 9], 1.75), x: innerGlyph.x([12, 9]), minus: innerGlyph.minus([12, 9], 2.5) };
+  const badgeSize = { plus: [2.5], check: [], x: [2], minus: [] };
+  for (const g of ['plus', 'check', 'x', 'minus']) {
+    ICONS.push({ name: `bookmark-${g}`, batch: 28, parts: [...byName.get('bookmark').parts, ...bookmarkSign[g]] });
+    ICONS.push({ name: `calendar-${g}`, batch: 28, parts: withBadge(byName.get('calendar').parts, g, BADGE_C, ...badgeSize[g]) });
+    if (g !== 'minus') ICONS.push({ name: `mail-${g}`, batch: 28, parts: withBadge(byName.get('mail').parts, g, BADGE_C, ...badgeSize[g]) });
+  }
+  // заливка с вырезом (fillHoled); глаз — в массиве
+  for (const base of ['map-pin', 'circle-check', 'circle-x', 'circle-alert', 'circle-info', 'circle-question', 'circle-plus', 'circle-minus',
+    'circle-play', 'circle-pause', 'circle-stop', 'square-check', 'square-minus', 'square-plus', 'square-x', 'badge-check', 'shield-check',
+    'shield-alert', 'shield-x', 'lock', 'lock-open', 'message-dots', 'toggle-on']) ICONS.push({ name: `${base}-fill`, batch: 27, parts: fillHoled(byName.get(base).parts) });
+}

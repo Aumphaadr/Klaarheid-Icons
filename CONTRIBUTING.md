@@ -14,6 +14,8 @@ Contributions are accepted under the project license, [MIT-0](LICENSE).
    - `{ stroke: path }` — a line of the main weight (2);
    - `{ stroke: path, thin: true }` — a thin line (1.5) for small marks in tight spaces;
    - `{ solid: path }` — a filled shape with the line around it;
+   - `{ solid: path, holes: [parts] }` — a filled shape with marks cut out of it: each hole is a part (a line, a dot,
+     a disk, a solid shape) removed from the fill; holes stay at least half a line away from the line around the fill;
    - `{ fill: path }` — a pure fill, no line;
    - `{ disk: [center, r] }`, `{ dot: center }` — filled circles;
    - `{ capsule: [a, b, r] }` — a thick line of constant width 2r.

@@ -401,6 +401,9 @@ export function diskPiece(c, r) {
 }
 
 // ---------- объединение деталей ----------
+// Куски с neg — вырезы: итог — объединение обычных кусков минус объединение вырезов. Край выреза остаётся там, где
+// он внутри обычного куска и вне других вырезов, и идёт в обратную сторону (отверстие). Вырез не должен касаться
+// края обычного куска — такое касание вырождает контур, и сборка останавливается.
 export function union(pieces) {
   const edges = [];
   pieces.forEach((pc, k) => pc.loops.forEach((lp) => lp.forEach((e) => edges.push({ e, k }))));
@@ -411,30 +414,35 @@ export function union(pieces) {
   }
   const kept = [];
   edges.forEach(({ e, k }, i) => {
+    const neg = !!pieces[k].neg;
     const ts = [0, ...cuts[i].filter((t) => t > 1e-9 && t < 1 - 1e-9).sort((a, b) => a - b), 1];
     for (let q = 0; q + 1 < ts.length; q++) {
       if (ts[q + 1] - ts[q] < 1e-9) continue;
       const s = subEdge(e, ts[q], ts[q + 1]);
       if (edgeLen(s) < 1e-9) continue;
       const m = pointAt(s, 0.5);
-      let drop = false;
+      let drop = false, inside = false;
       const onB = [];
       for (let q = 0; q < pieces.length && !drop; q++) {
         if (q === k) continue;
         const d = pieces[q].bd(m);
-        if (d < -1e-7) drop = true;
+        if (!!pieces[q].neg !== neg) {
+          // кусок другого знака: обычный край внутри выреза уходит; край выреза держится внутри обычного куска
+          if (Math.abs(d) <= 1e-7) throw new Error(`вырез касается края детали у (${m.map((v) => v.toFixed(3)).join('; ')})`);
+          if (d < 0) { if (neg) inside = true; else drop = true; }
+        } else if (d < -1e-7) drop = true;
         else if (d <= 1e-7) onB.push(q);
       }
-      if (drop) continue;
+      if (drop || (neg && !inside)) continue;
       if (onB.length) {
-        // кусок лежит на границе другой детали: щуп наружу (справа от обхода — вне своей детали).
+        // кусок лежит на границе другой детали того же знака: щуп наружу (справа от обхода — вне своей детали).
         // Если снаружи другая деталь — это шов внутри объединения; иначе — общая граница, оставляем
         // одну копию (у детали с меньшим номером).
         const tg = tangentAt(s, 0.5), probe = add(m, mul([tg[1], -tg[0]], 1e-5));
         if (onB.some((q) => pieces[q].bd(probe) < 0)) continue;
         if (onB.some((q) => q < k)) continue;
       }
-      kept.push({ e: s, k });
+      kept.push({ e: neg ? reverseEdge(s) : s, k });
     }
   });
   return chain(kept.map((q) => q.e));
