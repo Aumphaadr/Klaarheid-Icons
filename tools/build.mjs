@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ICONS } from '../src/icons.mjs';
-import { strokePiece, solidPiece, diskPiece, fillPiece, union, loopsToD, pathToD, fmt, line } from '../src/geom.mjs';
+import { strokePiece, solidPiece, diskPiece, fillPiece, union, loopsToD, pathToD, fmt, line, pointAt } from '../src/geom.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -26,9 +26,27 @@ function strokeElement(p, solid, k = 1) {
   }
   return `<path d="${pathToD(p, DP)}"${f}/>`;
 }
+// деталь → кусок контура; grow раздувает её (для краёв вырезов в svg/stroke)
+function pieceOf(pt, grow = 0) {
+  const h = H * weightOf(pt) + grow;
+  if (pt.stroke) return strokePiece(pt.stroke, h);
+  if (pt.solid) return solidPiece(pt.solid, h);
+  if (pt.disk) return diskPiece(pt.disk[0], pt.disk[1] + grow);
+  if (pt.fill) { if (grow) throw new Error('вырез чистой заливкой не поддержан'); return fillPiece(pt.fill); }
+  if (pt.capsule) return strokePiece(line(pt.capsule[0], pt.capsule[1]), pt.capsule[2] + grow); // толстая линия постоянной толщины 2r
+  return diskPiece(pt.dot, h);
+}
+// заливка с вырезами (holes — детали-знаки): два пути. Первый — осевая контура и точный край вырезов (объединение
+// знаков, как в svg/fill) с evenodd, только заливка; второй — та же осевая линией. Вырез обязан отстоять от осевой
+// не меньше чем на полтолщины — иначе линия края его закроет
+function holedElement(pt) {
+  const k = weightOf(pt), inner = fillPiece(pt.solid), loops = union(pt.holes.map((q) => pieceOf(q)));
+  for (const e of loops.flat()) for (const t of [0, 0.25, 0.5, 0.75]) if (inner.bd(pointAt(e, t)) > -H * k) throw new Error('вырез заходит на линию края заливки');
+  return `<path d="${pathToD(pt.solid, DP)}${loopsToD(loops, DP)}" fill="currentColor" fill-rule="evenodd" stroke="none"/>\n  ${strokeElement(pt.solid, false, k)}`;
+}
 const svgStroke = (parts) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="${n(W)}" stroke-linecap="round" stroke-linejoin="round">\n${parts.map((pt) => {
   if (pt.stroke) return `  ${strokeElement(pt.stroke, false, weightOf(pt))}`;
-  if (pt.solid) return `  ${strokeElement(pt.solid, true, weightOf(pt))}`;
+  if (pt.solid) return `  ${pt.holes ? holedElement(pt) : strokeElement(pt.solid, true, weightOf(pt))}`;
   if (pt.capsule) return `  <path d="${pathToD(line(pt.capsule[0], pt.capsule[1]), DP)}" stroke-width="${n(2 * pt.capsule[2])}"/>`;
   if (pt.fill) return `  <path d="${pathToD(pt.fill, DP)}" fill="currentColor" stroke="none"/>`;
   const [c, r] = pt.disk ?? [pt.dot, H * weightOf(pt)];
@@ -47,15 +65,8 @@ const report = [];
 let failed = 0;
 for (const icon of ICONS) {
   try {
-    const pieces = icon.parts.map((pt) => {
-      const h = H * weightOf(pt);
-      if (pt.stroke) return strokePiece(pt.stroke, h);
-      if (pt.solid) return solidPiece(pt.solid, h);
-      if (pt.disk) return diskPiece(pt.disk[0], pt.disk[1]);
-      if (pt.fill) return fillPiece(pt.fill);
-      if (pt.capsule) return strokePiece(line(pt.capsule[0], pt.capsule[1]), pt.capsule[2]); // толстая линия постоянной толщины 2r
-      return diskPiece(pt.dot, h);
-    });
+    // вырезы заливки — отрицательные куски: union вычитает их из остального
+    const pieces = icon.parts.flatMap((pt) => [pieceOf(pt), ...(pt.holes ?? []).map((q) => ({ ...pieceOf(q), neg: true }))]);
     const loops = union(pieces);
     const d = loopsToD(loops, DP);
     fs.writeFileSync(path.join(ROOT, 'svg', 'fill', `${icon.name}.svg`), svgFill(d));
