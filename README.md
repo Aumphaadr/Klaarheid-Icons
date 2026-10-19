@@ -142,8 +142,7 @@ The geometry kernel and the icon definitions were written with Claude, an AI ass
 author’s direction; every icon was reviewed by the author.
 
 ## License
-
-[MIT No Attribution (MIT-0)](LICENSE) © 2026 Aumphaadr — the MIT License without its only condition.
+[MIT No Attribution (MIT-0)](LICENSE) © 2026 the MIT License without its only condition.
 In short:
 
 - free in personal and commercial, open and closed projects;
